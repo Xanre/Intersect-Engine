@@ -1,4 +1,4 @@
-﻿namespace Intersect.Enums
+namespace Intersect.Enums
 {
 
     public enum CommonEventTrigger
@@ -32,7 +32,15 @@
 
         GuildMemberLeft,
 
-        GuildMemberKicked
+        GuildMemberKicked,
+
+        GuildVariableChange,
+
+        InventoryChanged,
+
+        MapChanged,
+
+        UserVariableChange,
 
     }
 

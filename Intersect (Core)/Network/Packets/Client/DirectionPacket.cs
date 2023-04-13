@@ -8,27 +8,27 @@ using MessagePack;
 namespace Intersect.Network.Packets.Client
 {
     [MessagePackObject]
-    public class DirectionPacket : IntersectPacket
+    public partial class DirectionPacket : IntersectPacket
     {
         //Parameterless Constructor for MessagePack
         public DirectionPacket()
         {
         }
 
-        public DirectionPacket(byte dir)
+        public DirectionPacket(Direction dir)
         {
             Direction = dir;
         }
 
         [Key(0)]
-        public byte Direction { get; set; }
+        public Direction Direction { get; set; }
 
         public override Dictionary<string, SanitizedValue<object>> Sanitize()
         {
             var sanitizer = new Sanitizer();
 
-            Direction = (byte) sanitizer.Clamp(
-                nameof(Direction), Direction, 0, Enum.GetValues(typeof(Directions)).Length
+            Direction = (Direction) sanitizer.Clamp(
+                nameof(Direction), (byte)Direction, 0, Enum.GetValues(typeof(Direction)).Length
             );
 
             return sanitizer.Sanitized;

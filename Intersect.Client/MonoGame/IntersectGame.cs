@@ -1,4 +1,4 @@
-﻿using Intersect.Client.Core;
+using Intersect.Client.Core;
 using Intersect.Client.Core.Controls;
 using Intersect.Client.Framework.Gwen.Input;
 using Intersect.Client.Framework.Gwen.Renderer;
@@ -11,7 +11,6 @@ using Intersect.Client.MonoGame.File_Management;
 using Intersect.Client.MonoGame.Graphics;
 using Intersect.Client.MonoGame.Input;
 using Intersect.Client.MonoGame.Network;
-using Intersect.Client.MonoGame.System;
 using Intersect.Configuration;
 using Intersect.Updater;
 
@@ -24,14 +23,17 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 
+using Intersect.Utilities;
+
 using MainMenu = Intersect.Client.Interface.Menu.MainMenu;
+using Intersect.Logging;
 
 namespace Intersect.Client.MonoGame
 {
     /// <summary>
     ///     This is the main type for your game.
     /// </summary>
-    internal class IntersectGame : Game
+    internal partial class IntersectGame : Game
     {
         private bool mInitialized;
 
@@ -66,7 +68,15 @@ namespace Intersect.Client.MonoGame
             Context = context;
             PostStartupAction = postStartupAction;
 
-            Strings.Load();
+            try
+            {
+                Strings.Load();
+            }
+            catch (Exception exception)
+            {
+                Log.Error(exception);
+                throw;
+            }
 
             mGraphics = new GraphicsDeviceManager(this)
             {
@@ -86,9 +96,8 @@ namespace Intersect.Client.MonoGame
             Globals.ContentManager = new MonoContentManager();
             Globals.Database = new MonoDatabase();
 
-            /* Load configuration */
+            // Load configuration.
             ClientConfiguration.LoadAndSave(ClientConfiguration.DefaultPath);
-
             Globals.Database.LoadPreferences();
 
             Window.IsBorderless = Context.StartupOptions.BorderlessWindow;
@@ -103,24 +112,32 @@ namespace Intersect.Client.MonoGame
 
             Core.Graphics.Renderer = renderer;
 
-            Globals.System = new MonoSystem();
             Interface.Interface.GwenRenderer = new IntersectRenderer(null, Core.Graphics.Renderer);
             Interface.Interface.GwenInput = new IntersectInput();
             Controls.Init();
 
-            Window.Position = new Microsoft.Xna.Framework.Point(-20, -2000);
+            // Windows Position
+            Window.Position = new Microsoft.Xna.Framework.Point(-20, -2000);;
             Window.AllowAltF4 = false;
 
+            // Store frequently used property values in local variables.
+            string mouseCursor = ClientConfiguration.Instance.MouseCursor;
+            string updateUrl = ClientConfiguration.Instance.UpdateUrl;
+
             // If we're going to be rendering a custom mouse cursor, hide the default one!
-            if (!string.IsNullOrWhiteSpace(ClientConfiguration.Instance.MouseCursor))
+            if (!string.IsNullOrWhiteSpace(mouseCursor))
             {
                 IsMouseVisible = false;
             }
-            
-            if (!string.IsNullOrWhiteSpace(ClientConfiguration.Instance.UpdateUrl))
+
+            // Reuse Updater object instead of creating a new one each time.
+            if (!string.IsNullOrWhiteSpace(updateUrl))
             {
                 mUpdater = new Updater.Updater(
-                    ClientConfiguration.Instance.UpdateUrl, Path.Combine("version.json"), true, 5
+                    updateUrl,
+                    Path.Combine("version.json"),
+                    true,
+                    5
                 );
             }
         }
@@ -228,7 +245,7 @@ namespace Intersect.Client.MonoGame
                     {
                         lock (Globals.GameLock)
                         {
-                            Main.Update();
+                            Main.Update(gameTime.ElapsedGameTime);
                         }
 
                         ///mLastUpdateTime = gameTime.TotalGameTime.TotalMilliseconds + (1000/60f);
@@ -236,6 +253,7 @@ namespace Intersect.Client.MonoGame
                 }
                 else
                 {
+                    Main.DestroyGame();
                     Exit();
                 }
             }
@@ -277,7 +295,7 @@ namespace Intersect.Client.MonoGame
                 {
                     lock (Globals.GameLock)
                     {
-                        Core.Graphics.Render();
+                        Core.Graphics.Render(gameTime.ElapsedGameTime);
                     }
                 }
             }
@@ -297,7 +315,9 @@ namespace Intersect.Client.MonoGame
 
         protected override void OnExiting(object sender, EventArgs args)
         {
-            if (Globals.Me != null && Globals.Me.CombatTimer > Globals.System?.GetTimeMs())
+            Log.Info("System window closing (due to user interaction most likely).");
+
+            if (Globals.Me != null && Globals.Me.CombatTimer > Timing.Global?.Milliseconds)
             {
                 //Try to prevent SDL Window Close
                 var exception = false;
@@ -383,8 +403,8 @@ namespace Intersect.Client.MonoGame
                     status = Strings.Update.Updating;
                     progressPercent = mUpdater.Progress / 100f;
                     progress = Strings.Update.Percent.ToString((int) mUpdater.Progress);
-                    filesRemaining = mUpdater.FilesRemaining + " Files Remaining";
-                    sizeRemaining = mUpdater.GetHumanReadableFileSize(mUpdater.SizeRemaining) + " Left";
+                    filesRemaining = Strings.Update.Files.ToString(mUpdater.FilesRemaining);
+                    sizeRemaining = Strings.Update.Size.ToString(mUpdater.GetHumanReadableFileSize(mUpdater.SizeRemaining));
                     break;
 
                 case UpdateStatus.Restart:
@@ -504,7 +524,7 @@ namespace Intersect.Client.MonoGame
         /// <summary>
         /// Implements <see cref="IPlatformRunner"/> for MonoGame.
         /// </summary>
-        internal class MonoGameRunner : IPlatformRunner
+        internal partial class MonoGameRunner : IPlatformRunner
         {
             /// <inheritdoc />
             public void Start(IClientContext context, Action postStartupAction)

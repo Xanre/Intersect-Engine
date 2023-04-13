@@ -1,14 +1,14 @@
-﻿using Intersect.Client.Core;
+using Intersect.Client.Core;
+using Intersect.Client.Framework.Entities;
+using Intersect.Client.Framework.Maps;
 using Intersect.Client.General;
 using Intersect.Client.Maps;
+using Intersect.Enums;
 using Intersect.GameObjects;
 using Intersect.GameObjects.Maps;
 using Intersect.Utilities;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Intersect.Client.Entities
 {
@@ -17,12 +17,12 @@ namespace Intersect.Client.Entities
         private MapCritterAttribute mAttribute;
         private long mLastMove = -1;
 
-        public Critter(MapInstance map, byte x, byte y, MapCritterAttribute att) : base(Guid.NewGuid(), null, false)
+        public Critter(MapInstance map, byte x, byte y, MapCritterAttribute att) : base(Guid.NewGuid(), null, EntityType.GlobalEntity)
         {
             mAttribute = att;
 
             //setup Sprite & Animation
-            MySprite = att.Sprite;
+            Sprite = att?.Sprite;
             var anim = AnimationBase.Get(att.AnimationId);
             if (anim != null)
             {
@@ -31,18 +31,18 @@ namespace Intersect.Client.Entities
             }
 
             //Define Location
-            CurrentMap = map.Id;
+            MapId = map?.Id ?? default;
             X = x;
             Y = y;
 
             //Determine Direction
             if (mAttribute.Direction == 0)
             {
-                Dir = (byte)Globals.Random.Next(4);
+                Dir = Randomization.NextDirection();
             }
             else
             {
-                Dir = (byte)(mAttribute.Direction - 1);
+                Dir = (Direction)(mAttribute.Direction - 1);
             }
 
             //Block Players?
@@ -53,7 +53,7 @@ namespace Intersect.Client.Entities
         {
             if (base.Update())
             {
-                if (mLastMove < Globals.System.GetTimeMs())
+                if (mLastMove < Timing.Global.Milliseconds)
                 {
                     switch (mAttribute.Movement)
                     {
@@ -61,12 +61,12 @@ namespace Intersect.Client.Entities
                             MoveRandomly();
                             break;
                         case 1: //Turn?
-                            Dir = (byte)Globals.Random.Next(4);
+                            Dir = Randomization.NextDirection();
                             break;
 
                     }
 
-                    mLastMove = Globals.System.GetTimeMs() + mAttribute.Frequency + Globals.Random.Next((int)(mAttribute.Frequency * .5f));
+                    mLastMove = Timing.Global.Milliseconds + mAttribute.Frequency + Globals.Random.Next((int)(mAttribute.Frequency * .5f));
                 }
                 return true;
             }
@@ -75,77 +75,107 @@ namespace Intersect.Client.Entities
 
         private void MoveRandomly()
         {
-            MoveDir = (byte)Globals.Random.Next(4);
+            MoveDir = Randomization.NextDirection();
             var tmpX = (sbyte)X;
             var tmpY = (sbyte)Y;
-            Entity blockedBy = null;
+            IEntity blockedBy = null;
 
-            if (!IsMoving && MoveTimer < Timing.Global.Ticks / TimeSpan.TicksPerMillisecond)
+            if (IsMoving || MoveTimer >= Timing.Global.Milliseconds)
             {
-                switch (MoveDir)
+                return;
+            }
+
+            var deltaX = 0;
+            var deltaY = 0;
+
+            switch (MoveDir)
+            {
+                case Direction.Up:
+                    deltaX = 0;
+                    deltaY = -1;
+                    break;
+
+                case Direction.Down:
+                    deltaX = 0;
+                    deltaY = 1;
+                    break;
+
+                case Direction.Left:
+                    deltaX = -1;
+                    deltaY = 0;
+                    break;
+
+                case Direction.Right:
+                    deltaX = 1;
+                    deltaY = 0;
+                    break;
+
+                case Direction.UpLeft:
+                    deltaX = -1;
+                    deltaY = -1;
+                    break;
+
+                case Direction.UpRight:
+                    deltaX = 1;
+                    deltaY = -1;
+                    break;
+
+                case Direction.DownLeft:
+                    deltaX = -1;
+                    deltaY = 1;
+                    break;
+
+                case Direction.DownRight:
+                    deltaX = 1;
+                    deltaY = 1;
+                    break;
+            }
+
+            if (deltaX != 0 || deltaY != 0)
+            {
+                var newX = tmpX + deltaX;
+                var newY = tmpY + deltaY;
+                var isBlocked =
+                    IsTileBlocked(newX, newY, Z, MapId, ref blockedBy, true, true, mAttribute.IgnoreNpcAvoids) == -1;
+                var playerOnTile = PlayerOnTile(MapId, newX, newY);
+
+                if (isBlocked && newX >= 0 && newX < Options.MapWidth && newY >= 0 && newY < Options.MapHeight &&
+                    (!mAttribute.BlockPlayers || !playerOnTile))
                 {
-                    case 0: // Up
-                        if (IsTileBlocked(X, Y - 1, Z, CurrentMap, ref blockedBy, true, true, mAttribute.IgnoreNpcAvoids) == -1 && Y > 0 && (!mAttribute.BlockPlayers || !PlayerOnTile(CurrentMap, X, Y - 1)))
-                        {
-                            tmpY--;
-                            IsMoving = true;
-                            Dir = 0;
-                            OffsetY = Options.TileHeight;
-                            OffsetX = 0;
-                        }
+                    tmpX += (sbyte)deltaX;
+                    tmpY += (sbyte)deltaY;
+                    IsMoving = true;
+                    Dir = MoveDir;
 
-                        break;
-                    case 1: // Down
-                        if (IsTileBlocked(X, Y + 1, Z, CurrentMap, ref blockedBy, true, true, mAttribute.IgnoreNpcAvoids) == -1 && Y < Options.MapHeight - 1 && (!mAttribute.BlockPlayers || !PlayerOnTile(CurrentMap, X, Y + 1)))
-                        {
-                            tmpY++;
-                            IsMoving = true;
-                            Dir = 1;
-                            OffsetY = -Options.TileHeight;
-                            OffsetX = 0;
-                        }
-
-                        break;
-                    case 2: // Left
-                        if (IsTileBlocked(X - 1, Y, Z, CurrentMap, ref blockedBy, true, true, mAttribute.IgnoreNpcAvoids) == -1 && X > 0 && (!mAttribute.BlockPlayers || !PlayerOnTile(CurrentMap, X - 1, Y)))
-                        {
-                            tmpX--;
-                            IsMoving = true;
-                            Dir = 2;
-                            OffsetY = 0;
-                            OffsetX = Options.TileWidth;
-                        }
-
-                        break;
-                    case 3: // Right
-                        if (IsTileBlocked(X + 1, Y, Z, CurrentMap, ref blockedBy, true, true, mAttribute.IgnoreNpcAvoids) == -1 && X < Options.MapWidth - 1 && (!mAttribute.BlockPlayers || !PlayerOnTile(CurrentMap, X+1, Y)))
-                        {
-                            //If BlockPlayers then make sure there is no player here
-                            tmpX++;
-                            IsMoving = true;
-                            Dir = 3;
-                            OffsetY = 0;
-                            OffsetX = -Options.TileWidth;
-                        }
-
-                        break;
-                }
-
-                if (IsMoving)
-                {
-                    X = (byte)tmpX;
-                    Y = (byte)tmpY;
-
-                    //TryToChangeDimension();
-                    MoveTimer = (Timing.Global.Ticks / TimeSpan.TicksPerMillisecond) + (long)GetMovementTime();
-                }
-                else
-                {
-                    if (MoveDir != Dir)
+                    if (deltaX == 0)
                     {
-                        Dir = (byte)MoveDir;
+                        OffsetX = 0;
+                    }
+                    else
+                    {
+                        OffsetX = deltaX > 0 ? -Options.TileWidth : Options.TileWidth;
+                    }
+
+                    if (deltaY == 0)
+                    {
+                        OffsetY = 0;
+                    }
+                    else
+                    {
+                        OffsetY = deltaY > 0 ? -Options.TileHeight : Options.TileHeight;
                     }
                 }
+            }
+
+            if (IsMoving)
+            {
+                X = (byte)tmpX;
+                Y = (byte)tmpY;
+                MoveTimer = Timing.Global.Milliseconds + (long)GetMovementTime();
+            }
+            else if (MoveDir != Dir)
+            {
+                Dir = MoveDir;
             }
         }
 
@@ -158,7 +188,7 @@ namespace Intersect.Client.Entities
                     continue;
                 }
 
-                if (en.Value.CurrentMap == mapId &&
+                if (en.Value.MapId == mapId &&
                         en.Value.X == x &&
                         en.Value.Y == y)
                 {
@@ -171,7 +201,7 @@ namespace Intersect.Client.Entities
             return false;
         }
 
-        public override HashSet<Entity> DetermineRenderOrder(HashSet<Entity> renderList, MapInstance map)
+        public override HashSet<Entity> DetermineRenderOrder(HashSet<Entity> renderList, IMapInstance map)
         {
             if (mAttribute.Layer == 1)
             {
@@ -184,8 +214,8 @@ namespace Intersect.Client.Entities
                 return null;
             }
 
-            var gridX = Globals.Me.MapInstance.MapGridX;
-            var gridY = Globals.Me.MapInstance.MapGridY;
+            var gridX = Globals.Me.MapInstance.GridX;
+            var gridY = Globals.Me.MapInstance.GridY;
             for (var x = gridX - 1; x <= gridX + 1; x++)
             {
                 for (var y = gridY - 1; y <= gridY + 1; y++)
@@ -196,7 +226,7 @@ namespace Intersect.Client.Entities
                         y < Globals.MapGridHeight &&
                         Globals.MapGrid[x, y] != Guid.Empty)
                     {
-                        if (Globals.MapGrid[x, y] == CurrentMap)
+                        if (Globals.MapGrid[x, y] == MapId)
                         {
                             if (mAttribute.Layer == 0)
                             {

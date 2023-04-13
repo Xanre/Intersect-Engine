@@ -1,10 +1,11 @@
 ﻿using MessagePack;
 using System;
+using Intersect.Enums;
 
 namespace Intersect.Network.Packets.Server
 {
     [MessagePackObject]
-    public class PlayAnimationPacket : IntersectPacket
+    public partial class PlayAnimationPacket : IntersectPacket
     {
         //Parameterless Constructor for MessagePack
         public PlayAnimationPacket()
@@ -18,7 +19,7 @@ namespace Intersect.Network.Packets.Server
             Guid mapId,
             int x,
             int y,
-            sbyte direction
+            Direction direction
         )
         {
             AnimationId = animId;
@@ -49,7 +50,7 @@ namespace Intersect.Network.Packets.Server
         public int Y { get; set; }
 
         [Key(6)]
-        public sbyte Direction { get; set; }
+        public Direction Direction { get; set; }
 
     }
 

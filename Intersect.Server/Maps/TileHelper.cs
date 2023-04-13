@@ -6,7 +6,7 @@ using Intersect.Server.Database;
 namespace Intersect.Server.Maps
 {
 
-    public class TileHelper
+    public partial class TileHelper
     {
 
         private Guid mMapId;
@@ -70,7 +70,7 @@ namespace Intersect.Server.Maps
 
         private bool TransitionMaps(int direction)
         {
-            var map = MapInstance.Get(mMapId);
+            var map = MapController.Get(mMapId);
             if (map == null)
             {
                 return false;
@@ -86,7 +86,7 @@ namespace Intersect.Server.Maps
             var gridY = map.MapGridY;
             switch (direction)
             {
-                case (int) Directions.Up:
+                case (int) Direction.Up:
                     if (gridY > 0 && grid.MyGrid[gridX, gridY - 1] != Guid.Empty)
                     {
                         mMapId = grid.MyGrid[gridX, gridY - 1];
@@ -96,7 +96,7 @@ namespace Intersect.Server.Maps
                     }
 
                     return false;
-                case (int) Directions.Down:
+                case (int) Direction.Down:
                     if (gridY + 1 < grid.Height && grid.MyGrid[gridX, gridY + 1] != Guid.Empty)
                     {
                         mMapId = grid.MyGrid[gridX, gridY + 1];
@@ -106,7 +106,7 @@ namespace Intersect.Server.Maps
                     }
 
                     return false;
-                case (int) Directions.Left:
+                case (int) Direction.Left:
                     if (gridX > 0 && grid.MyGrid[gridX - 1, gridY] != Guid.Empty)
                     {
                         mMapId = grid.MyGrid[gridX - 1, gridY];
@@ -116,7 +116,7 @@ namespace Intersect.Server.Maps
                     }
 
                     return false;
-                case (int) Directions.Right:
+                case (int) Direction.Right:
                     if (gridX + 1 < grid.Width && grid.MyGrid[gridX + 1, gridY] != Guid.Empty)
                     {
                         mMapId = grid.MyGrid[gridX + 1, gridY];
@@ -133,15 +133,15 @@ namespace Intersect.Server.Maps
 
         private bool Fix()
         {
-            if (!MapInstance.Lookup.Keys.Contains(mMapId))
+            if (!MapController.Lookup.Keys.Contains(mMapId))
             {
                 return false;
             }
 
-            var curMap = MapInstance.Get(mMapId);
+            var curMap = MapController.Get(mMapId);
             while (mTileX < 0)
             {
-                if (!TransitionMaps((int) Directions.Left))
+                if (!TransitionMaps((int) Direction.Left))
                 {
                     return false;
                 }
@@ -149,7 +149,7 @@ namespace Intersect.Server.Maps
 
             while (mTileY < 0)
             {
-                if (!TransitionMaps((int) Directions.Up))
+                if (!TransitionMaps((int) Direction.Up))
                 {
                     return false;
                 }
@@ -157,7 +157,7 @@ namespace Intersect.Server.Maps
 
             while (mTileX >= Options.MapWidth)
             {
-                if (!TransitionMaps((int) Directions.Right))
+                if (!TransitionMaps((int) Direction.Right))
                 {
                     return false;
                 }
@@ -165,7 +165,7 @@ namespace Intersect.Server.Maps
 
             while (mTileY >= Options.MapHeight)
             {
-                if (!TransitionMaps((int) Directions.Down))
+                if (!TransitionMaps((int) Direction.Down))
                 {
                     return false;
                 }
@@ -179,9 +179,9 @@ namespace Intersect.Server.Maps
             return mMapId;
         }
 
-        public MapInstance GetMap()
+        public MapController GetMap()
         {
-            return MapInstance.Get(mMapId);
+            return MapController.Get(mMapId);
         }
 
         public byte GetX()
@@ -196,7 +196,7 @@ namespace Intersect.Server.Maps
 
         public static bool IsTileValid(Guid mapId, int tileX, int tileY)
         {
-            if (!MapInstance.Lookup.Keys.Contains(mapId))
+            if (!MapController.Lookup.Keys.Contains(mapId))
             {
                 return false;
             }

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
@@ -18,6 +18,7 @@ using Intersect.Utilities;
 using Microsoft.Xna.Framework.Graphics;
 
 using WeifenLuo.WinFormsUI.Docking;
+using MapAttribute = Intersect.Enums.MapAttribute;
 
 namespace Intersect.Editor.Forms.DockingElements
 {
@@ -56,13 +57,13 @@ namespace Intersect.Editor.Forms.DockingElements
         public FrmMapLayers()
         {
             InitializeComponent();
+            Icon = System.Drawing.Icon.ExtractAssociatedIcon(System.Reflection.Assembly.GetExecutingAssembly().Location);
+
             mMapLayers.Add(picLayer1);
             mMapLayers.Add(picLayer2);
             mMapLayers.Add(picLayer3);
             mMapLayers.Add(picLayer4);
             mMapLayers.Add(picLayer5);
-
-            this.Icon = Properties.Resources.Icon;
         }
 
         public void Init()
@@ -114,6 +115,18 @@ namespace Intersect.Editor.Forms.DockingElements
 
             rbZDimension.Visible = Options.ZDimensionVisible;
             grpZResource.Visible = Options.ZDimensionVisible;
+            grpInstanceSettings.Visible = chkChangeInstance.Checked;
+
+            cmbInstanceType.Items.Clear();
+            // We do not want to iterate over the "NoChange" enum
+            foreach (MapInstanceType instanceType in Enum.GetValues(typeof(MapInstanceType)))
+            {
+                cmbInstanceType.Items.Add(instanceType.ToString());
+            }
+            cmbInstanceType.SelectedIndex = 0;
+
+            cmbWarpSound.Items.Clear();
+            RefreshMapWarpSounds();
         }
 
         //Tiles Tab
@@ -460,6 +473,7 @@ namespace Intersect.Editor.Forms.DockingElements
             {
                 cmbItemAttribute.SelectedIndex = 0;
             }
+            nudItemRespawnTime.Value = 0;
         }
 
         private void rbBlocked_CheckedChanged(object sender, EventArgs e)
@@ -496,6 +510,7 @@ namespace Intersect.Editor.Forms.DockingElements
             }
 
             HideAttributeMenus();
+            RefreshMapWarpSounds();
             grpWarp.Visible = true;
         }
 
@@ -504,7 +519,7 @@ namespace Intersect.Editor.Forms.DockingElements
             HideAttributeMenus();
             grpSound.Visible = true;
             cmbMapAttributeSound.Items.Clear();
-            cmbMapAttributeSound.Items.Add(Strings.General.none);
+            cmbMapAttributeSound.Items.Add(Strings.General.None);
             cmbMapAttributeSound.Items.AddRange(GameContentManager.SmartSortedSoundNames);
             cmbMapAttributeSound.SelectedIndex = 0;
         }
@@ -560,173 +575,177 @@ namespace Intersect.Editor.Forms.DockingElements
         {
             if (rbBlocked.Checked == true)
             {
-                return (int) MapAttributes.Blocked;
+                return (int) MapAttribute.Blocked;
             }
             else if (rbItem.Checked == true)
             {
-                return (int) MapAttributes.Item;
+                return (int) MapAttribute.Item;
             }
             else if (rbZDimension.Checked == true)
             {
-                return (int) MapAttributes.ZDimension;
+                return (int) MapAttribute.ZDimension;
             }
             else if (rbNPCAvoid.Checked == true)
             {
-                return (int) MapAttributes.NpcAvoid;
+                return (int) MapAttribute.NpcAvoid;
             }
             else if (rbWarp.Checked == true)
             {
-                return (int) MapAttributes.Warp;
+                return (int) MapAttribute.Warp;
             }
             else if (rbSound.Checked == true)
             {
-                return (int) MapAttributes.Sound;
+                return (int) MapAttribute.Sound;
             }
             else if (rbResource.Checked == true)
             {
-                return (int) MapAttributes.Resource;
+                return (int) MapAttribute.Resource;
             }
             else if (rbAnimation.Checked == true)
             {
-                return (int) MapAttributes.Animation;
+                return (int) MapAttribute.Animation;
             }
             else if (rbGrappleStone.Checked == true)
             {
-                return (int) MapAttributes.GrappleStone;
+                return (int) MapAttribute.GrappleStone;
             }
             else if (rbSlide.Checked == true)
             {
-                return (int) MapAttributes.Slide;
+                return (int) MapAttribute.Slide;
             }
             else if (rbCritter.Checked == true)
             {
-                return (int) MapAttributes.Critter;
+                return (int) MapAttribute.Critter;
             }
 
-            return (int) MapAttributes.Walkable;
+            return (int) MapAttribute.Walkable;
         }
 
-        private MapAttributes SelectedMapAttributeType
+        private MapAttribute SelectedMapAttributeType
         {
             get
             {
                 if (rbBlocked.Checked)
                 {
-                    return MapAttributes.Blocked;
+                    return MapAttribute.Blocked;
                 }
-                
+
                 if (rbItem.Checked)
                 {
-                    return MapAttributes.Item;
+                    return MapAttribute.Item;
                 }
 
                 if (rbZDimension.Checked)
                 {
-                    return MapAttributes.ZDimension;
+                    return MapAttribute.ZDimension;
                 }
 
                 if (rbNPCAvoid.Checked)
                 {
-                    return MapAttributes.NpcAvoid;
+                    return MapAttribute.NpcAvoid;
                 }
 
                 if (rbWarp.Checked)
                 {
-                    return MapAttributes.Warp;
+                    return MapAttribute.Warp;
                 }
 
                 if (rbSound.Checked)
                 {
-                    return MapAttributes.Sound;
+                    return MapAttribute.Sound;
                 }
 
                 if (rbResource.Checked)
                 {
-                    return MapAttributes.Resource;
+                    return MapAttribute.Resource;
                 }
 
                 if (rbAnimation.Checked)
                 {
-                    return MapAttributes.Animation;
+                    return MapAttribute.Animation;
                 }
 
                 if (rbGrappleStone.Checked)
                 {
-                    return MapAttributes.GrappleStone;
+                    return MapAttribute.GrappleStone;
                 }
 
                 if (rbSlide.Checked)
                 {
-                    return MapAttributes.Slide;
+                    return MapAttribute.Slide;
                 }
 
                 if (rbCritter.Checked)
                 {
-                    return MapAttributes.Critter;
+                    return MapAttribute.Critter;
                 }
 
-                return (MapAttributes) byte.MaxValue;
+                return (MapAttribute) byte.MaxValue;
             }
         }
 
         [Obsolete("The entire switch statement should be implemented as a parameterized CreateAttribute().")]
-        public MapAttribute CreateAttribute()
+        public GameObjects.Maps.MapAttribute CreateAttribute()
         {
             var attributeType = SelectedMapAttributeType;
-            var attribute = MapAttribute.CreateAttribute(attributeType);
+            var attribute = GameObjects.Maps.MapAttribute.CreateAttribute(attributeType);
             switch (SelectedMapAttributeType)
             {
-                case MapAttributes.Walkable:
-                case MapAttributes.Blocked:
-                case MapAttributes.GrappleStone:
-                case MapAttributes.NpcAvoid:
+                case MapAttribute.Walkable:
+                case MapAttribute.Blocked:
+                case MapAttribute.GrappleStone:
+                case MapAttribute.NpcAvoid:
                     break;
 
-                case MapAttributes.Item:
+                case MapAttribute.Item:
                     var itemAttribute = attribute as MapItemAttribute;
                     itemAttribute.ItemId = ItemBase.IdFromList(cmbItemAttribute.SelectedIndex);
                     itemAttribute.Quantity = (int)nudItemQuantity.Value;
+                    itemAttribute.RespawnTime = (long)nudItemRespawnTime.Value;
                     break;
 
-                case MapAttributes.ZDimension:
+                case MapAttribute.ZDimension:
                     var zDimensionAttribute = attribute as MapZDimensionAttribute;
                     zDimensionAttribute.GatewayTo = GetEditorDimensionGateway();
                     zDimensionAttribute.BlockedLevel = GetEditorDimensionBlock();
                     break;
 
-                case MapAttributes.Warp:
+                case MapAttribute.Warp:
                     var warpAttribute = attribute as MapWarpAttribute;
                     warpAttribute.MapId = MapList.OrderedMaps[cmbWarpMap.SelectedIndex].MapId;
                     warpAttribute.X = (byte)nudWarpX.Value;
                     warpAttribute.Y = (byte)nudWarpY.Value;
                     warpAttribute.Direction = (WarpDirection)cmbDirection.SelectedIndex;
+                    warpAttribute.ChangeInstance = chkChangeInstance.Checked;
+                    warpAttribute.InstanceType = (MapInstanceType)cmbInstanceType.SelectedIndex;
+                    warpAttribute.WarpSound = TextUtils.SanitizeNone(cmbWarpSound.Text);
                     break;
 
-                case MapAttributes.Sound:
+                case MapAttribute.Sound:
                     var soundAttribute = attribute as MapSoundAttribute;
                     soundAttribute.Distance = (byte)nudSoundDistance.Value;
                     soundAttribute.File = TextUtils.SanitizeNone(cmbMapAttributeSound.Text);
                     soundAttribute.LoopInterval = (int)nudSoundLoopInterval.Value;
                     break;
 
-                case MapAttributes.Resource:
+                case MapAttribute.Resource:
                     var resourceAttribute = attribute as MapResourceAttribute;
                     resourceAttribute.ResourceId = ResourceBase.IdFromList(cmbResourceAttribute.SelectedIndex);
                     resourceAttribute.SpawnLevel = (byte)(rbLevel1.Checked ? 0 : 1);
                     break;
 
-                case MapAttributes.Animation:
+                case MapAttribute.Animation:
                     var animationAttribute = attribute as MapAnimationAttribute;
                     animationAttribute.AnimationId = AnimationBase.IdFromList(cmbAnimationAttribute.SelectedIndex);
                     animationAttribute.IsBlock = chkAnimationBlock.Checked;
                     break;
 
-                case MapAttributes.Slide:
+                case MapAttribute.Slide:
                     var slideAttribute = attribute as MapSlideAttribute;
                     slideAttribute.Direction = (byte)cmbSlideDir.SelectedIndex;
                     break;
 
-                case MapAttributes.Critter:
+                case MapAttribute.Critter:
                     var critterAttribute = attribute as MapCritterAttribute;
                     critterAttribute.Sprite = cmbCritterSprite.Text;
                     critterAttribute.AnimationId = AnimationBase.IdFromList(cmbCritterAnimation.SelectedIndex - 1);
@@ -746,7 +765,7 @@ namespace Intersect.Editor.Forms.DockingElements
             return attribute;
         }
 
-        public MapAttribute PlaceAttribute(MapBase mapDescriptor, int x, int y, MapAttribute attribute = null)
+        public GameObjects.Maps.MapAttribute PlaceAttribute(MapBase mapDescriptor, int x, int y, GameObjects.Maps.MapAttribute attribute = null)
         {
             if (attribute == null)
             {
@@ -760,7 +779,7 @@ namespace Intersect.Editor.Forms.DockingElements
 
         public bool RemoveAttribute(MapBase tmpMap, int x, int y)
         {
-            if (tmpMap.Attributes[x, y] != null && tmpMap.Attributes[x, y].Type != MapAttributes.Walkable)
+            if (tmpMap.Attributes[x, y] != null && tmpMap.Attributes[x, y].Type != MapAttribute.Walkable)
             {
                 tmpMap.Attributes[x, y] = null;
 
@@ -848,6 +867,8 @@ namespace Intersect.Editor.Forms.DockingElements
                 {
                     lstMapNpcs.SelectedIndex = 0;
                 }
+
+                Core.Graphics.TilePreviewUpdated = true;
             }
         }
 
@@ -963,12 +984,12 @@ namespace Intersect.Editor.Forms.DockingElements
         private void rbCritter_CheckedChanged(object sender, EventArgs e)
         {
             cmbCritterAnimation.Items.Clear();
-            cmbCritterAnimation.Items.Add(Strings.General.none);
+            cmbCritterAnimation.Items.Add(Strings.General.None);
             cmbCritterAnimation.Items.AddRange(AnimationBase.Names);
             cmbCritterAnimation.SelectedIndex = 0;
 
             cmbCritterSprite.Items.Clear();
-            cmbCritterSprite.Items.Add(Strings.General.none);
+            cmbCritterSprite.Items.Add(Strings.General.None);
             cmbCritterSprite.Items.AddRange(GameContentManager.GetSmartSortedTextureNames(GameContentManager.TextureType.Entity));
             cmbCritterSprite.SelectedIndex = 0;
 
@@ -1024,105 +1045,113 @@ namespace Intersect.Editor.Forms.DockingElements
             cmbAutotile.Items.Add(Strings.Tiles.animatedxp);
 
             //Attributes Panel
-            rbBlocked.Text = Strings.Attributes.blocked;
-            rbZDimension.Text = Strings.Attributes.zdimension;
-            rbNPCAvoid.Text = Strings.Attributes.npcavoid;
-            rbWarp.Text = Strings.Attributes.warp;
-            rbItem.Text = Strings.Attributes.itemspawn;
-            rbSound.Text = Strings.Attributes.mapsound;
-            rbResource.Text = Strings.Attributes.resourcespawn;
-            rbAnimation.Text = Strings.Attributes.mapanimation;
-            rbGrappleStone.Text = Strings.Attributes.grapple;
-            rbSlide.Text = Strings.Attributes.slide;
-            rbCritter.Text = Strings.Attributes.critter;
+            rbBlocked.Text = Strings.Attributes.Blocked;
+            rbZDimension.Text = Strings.Attributes.ZDimension;
+            rbNPCAvoid.Text = Strings.Attributes.NpcAvoid;
+            rbWarp.Text = Strings.Attributes.Warp;
+            rbItem.Text = Strings.Attributes.ItemSpawn;
+            rbSound.Text = Strings.Attributes.MapSound;
+            rbResource.Text = Strings.Attributes.ResourceSpawn;
+            rbAnimation.Text = Strings.Attributes.MapAnimation;
+            rbGrappleStone.Text = Strings.Attributes.Grapple;
+            rbSlide.Text = Strings.Attributes.Slide;
+            rbCritter.Text = Strings.Attributes.Critter;
 
             //Map Animation Groupbox
-            grpAnimation.Text = Strings.Attributes.mapanimation;
-            lblAnimation.Text = Strings.Attributes.mapanimation;
-            chkAnimationBlock.Text = Strings.Attributes.mapanimationblock;
+            grpAnimation.Text = Strings.Attributes.MapAnimation;
+            lblAnimation.Text = Strings.Attributes.MapAnimation;
+            chkAnimationBlock.Text = Strings.Attributes.MapAnimationBlock;
 
             //Slide Groupbox
-            grpSlide.Text = Strings.Attributes.slide;
-            lblSlideDir.Text = Strings.Attributes.dir;
+            grpSlide.Text = Strings.Attributes.Slide;
+            lblSlideDir.Text = Strings.Attributes.Direction;
             cmbSlideDir.Items.Clear();
             for (var i = -1; i < 4; i++)
             {
-                cmbSlideDir.Items.Add(Strings.Directions.dir[i]);
+                cmbSlideDir.Items.Add(Strings.Direction.dir[(Direction)i]);
             }
 
             //Map Sound
-            grpSound.Text = Strings.Attributes.mapsound;
-            lblMapSound.Text = Strings.Attributes.sound;
-            lblSoundDistance.Text = Strings.Attributes.distance;
+            grpSound.Text = Strings.Attributes.MapSound;
+            lblMapSound.Text = Strings.Attributes.Sound;
+            lblSoundDistance.Text = Strings.Attributes.Distance;
+            lblSoundInterval.Text = Strings.Attributes.SoundInterval;
 
             //Map Item
-            grpItem.Text = Strings.Attributes.itemspawn;
-            lblMapItem.Text = Strings.Attributes.item;
-            lblMaxItemAmount.Text = Strings.Attributes.quantity;
+            grpItem.Text = Strings.Attributes.ItemSpawn;
+            lblMapItem.Text = Strings.Attributes.Item;
+            lblMaxItemAmount.Text = Strings.Attributes.Quantity;
+            lblItemRespawnTime.Text = Strings.Attributes.RespawnTime;
+            tooltips.SetToolTip(lblItemRespawnTime, Strings.Attributes.RespawnTimeTooltip);
+            tooltips.SetToolTip(nudItemRespawnTime, Strings.Attributes.RespawnTimeTooltip);
 
             //Z-Dimension
-            grpZDimension.Text = Strings.Attributes.zdimension;
-            grpGateway.Text = Strings.Attributes.zgateway;
-            grpDimBlock.Text = Strings.Attributes.zblock;
-            rbGatewayNone.Text = Strings.Attributes.znone;
-            rbGateway1.Text = Strings.Attributes.zlevel1;
-            rbGateway2.Text = Strings.Attributes.zlevel2;
-            rbBlockNone.Text = Strings.Attributes.znone;
-            rbBlock1.Text = Strings.Attributes.zlevel1;
-            rbBlock2.Text = Strings.Attributes.zlevel2;
+            grpZDimension.Text = Strings.Attributes.ZDimension;
+            grpGateway.Text = Strings.Attributes.ZGateway;
+            grpDimBlock.Text = Strings.Attributes.ZBlock;
+            rbGatewayNone.Text = Strings.Attributes.ZNone;
+            rbGateway1.Text = Strings.Attributes.ZLevel1;
+            rbGateway2.Text = Strings.Attributes.ZLevel2;
+            rbBlockNone.Text = Strings.Attributes.ZNone;
+            rbBlock1.Text = Strings.Attributes.ZLevel1;
+            rbBlock2.Text = Strings.Attributes.ZLevel2;
 
             //Warp
-            grpWarp.Text = Strings.Attributes.warp;
-            lblMap.Text = Strings.Warping.map.ToString("");
+            grpWarp.Text = Strings.Attributes.Warp;
+            lblMap.Text = Strings.Attributes.Map;
             lblX.Text = Strings.Warping.x.ToString("");
             lblY.Text = Strings.Warping.y.ToString("");
             lblWarpDir.Text = Strings.Warping.direction.ToString("");
             cmbDirection.Items.Clear();
             for (var i = -1; i < 4; i++)
             {
-                cmbDirection.Items.Add(Strings.Directions.dir[i]);
+                cmbDirection.Items.Add(Strings.Direction.dir[(Direction)i]);
             }
+            lblInstance.Text = Strings.Warping.InstanceType;
+            chkChangeInstance.Text = Strings.Warping.ChangeInstance;
+            grpInstanceSettings.Text = Strings.Warping.MapInstancingGroup;
+            lblWarpSound.Text = Strings.Warping.WarpSound;
 
             btnVisualMapSelector.Text = Strings.Warping.visual;
 
             //Resource
-            grpResource.Text = Strings.Attributes.resourcespawn;
-            lblResource.Text = Strings.Attributes.resource;
-            grpZResource.Text = Strings.Attributes.zdimension;
-            rbLevel1.Text = Strings.Attributes.zlevel1;
-            rbLevel2.Text = Strings.Attributes.zlevel2;
+            grpResource.Text = Strings.Attributes.ResourceSpawn;
+            lblResource.Text = Strings.Attributes.Resource;
+            grpZResource.Text = Strings.Attributes.ZDimension;
+            rbLevel1.Text = Strings.Attributes.ZLevel1;
+            rbLevel2.Text = Strings.Attributes.ZLevel2;
 
             //Critter
-            grpCritter.Text = Strings.Attributes.critter;
-            lblCritterSprite.Text = Strings.Attributes.crittersprite;
-            lblCritterAnimation.Text = Strings.Attributes.critteranimation;
-            lblCritterMovement.Text = Strings.Attributes.crittermovement;
-            lblCritterLayer.Text = Strings.Attributes.critterlayer;
-            lblCritterMoveSpeed.Text = Strings.Attributes.critterspeed;
-            lblCritterMoveFrequency.Text = Strings.Attributes.critterfrequency;
-            chkCritterIgnoreNpcAvoids.Text = Strings.Attributes.critterignorenpcavoids;
-            chkCritterBlockPlayers.Text = Strings.Attributes.critterblockplayers;
-            lblCritterDirection.Text = Strings.Attributes.critterdirection;
+            grpCritter.Text = Strings.Attributes.Critter;
+            lblCritterSprite.Text = Strings.Attributes.CritterSprite;
+            lblCritterAnimation.Text = Strings.Attributes.CritterAnimation;
+            lblCritterMovement.Text = Strings.Attributes.CritterMovement;
+            lblCritterLayer.Text = Strings.Attributes.CritterLayer;
+            lblCritterMoveSpeed.Text = Strings.Attributes.CritterSpeed;
+            lblCritterMoveFrequency.Text = Strings.Attributes.CritterFrequency;
+            chkCritterIgnoreNpcAvoids.Text = Strings.Attributes.CritterIgnoreNpcAvoids;
+            chkCritterBlockPlayers.Text = Strings.Attributes.CritterBlockPlayers;
+            lblCritterDirection.Text = Strings.Attributes.CritterDirection;
 
             cmbCritterDirection.Items.Clear();
             cmbCritterDirection.Items.Add(Strings.NpcSpawns.randomdirection);
             for (var i = 0; i < 4; i++)
             {
-                cmbCritterDirection.Items.Add(Strings.Directions.dir[i]);
+                cmbCritterDirection.Items.Add(Strings.Direction.dir[(Direction)i]);
             }
             cmbCritterDirection.SelectedIndex = 0;
 
             cmbCritterMovement.Items.Clear();
-            for (var i = 0; i < Strings.Attributes.crittermovements.Count; i++)
+            for (var i = 0; i < Strings.Attributes.CritterMovements.Count; i++)
             {
-                cmbCritterMovement.Items.Add(Strings.Attributes.crittermovements[i]);
+                cmbCritterMovement.Items.Add(Strings.Attributes.CritterMovements[i]);
             }
             cmbCritterMovement.SelectedIndex = 0;
 
             cmbCritterLayer.Items.Clear();
-            for (var i = 0; i < Strings.Attributes.critterlayers.Count; i++)
+            for (var i = 0; i < Strings.Attributes.CritterLayers.Count; i++)
             {
-                cmbCritterLayer.Items.Add(Strings.Attributes.critterlayers[i]);
+                cmbCritterLayer.Items.Add(Strings.Attributes.CritterLayers[i]);
             }
             cmbCritterLayer.SelectedIndex = 1;
 
@@ -1135,7 +1164,7 @@ namespace Intersect.Editor.Forms.DockingElements
             cmbDir.Items.Add(Strings.NpcSpawns.randomdirection);
             for (var i = 0; i < 4; i++)
             {
-                cmbDir.Items.Add(Strings.Directions.dir[i]);
+                cmbDir.Items.Add(Strings.Direction.dir[(Direction)i]);
             }
 
             grpNpcList.Text = Strings.NpcSpawns.addremove;
@@ -1212,6 +1241,13 @@ namespace Intersect.Editor.Forms.DockingElements
             {
                 Globals.MapLayersWindow.lightEditor.Cancel();
             }
+        }
+
+        private void RefreshMapWarpSounds()
+        {
+            cmbWarpSound.Items.Add(Strings.General.None);
+            cmbWarpSound.Items.AddRange(GameContentManager.SmartSortedSoundNames);
+            cmbWarpSound.SelectedIndex = 0;
         }
 
         private void btnTileHeader_Click(object sender, EventArgs e)
@@ -1305,7 +1341,7 @@ namespace Intersect.Editor.Forms.DockingElements
                 LayerVisibility[Options.Instance.MapOpts.Layers.All[index]] = !LayerVisibility[Options.Instance.MapOpts.Layers.All[index]];
                 SetLayer(Globals.CurrentLayer);
             }
-            
+
         }
 
         private void picMapLayer_MouseHover(object sender, EventArgs e)
@@ -1327,12 +1363,22 @@ namespace Intersect.Editor.Forms.DockingElements
             nudItemQuantity.Value = Math.Max(1, nudItemQuantity.Value);
         }
 
+        private void NudItemRespawnTime_ValueChanged(object sender, System.EventArgs e)
+        {
+            nudItemRespawnTime.Value = Math.Max(0, nudItemRespawnTime.Value);
+        }
+
         private void cmbMapLayer_SelectedIndexChanged(object sender, EventArgs e)
         {
             if (cmbMapLayer.SelectedIndex > -1)
             {
                 SetLayer(Options.Instance.MapOpts.Layers.All[cmbMapLayer.SelectedIndex]);
             }
+        }
+
+        private void chkChangeInstance_CheckedChanged(object sender, EventArgs e)
+        {
+            grpInstanceSettings.Visible = chkChangeInstance.Checked;
         }
     }
 

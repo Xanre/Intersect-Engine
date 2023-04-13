@@ -4,7 +4,7 @@ using MessagePack;
 namespace Intersect.Admin.Actions
 {
     [MessagePackObject]
-    public class BanAction : AdminAction
+    public partial class BanAction : AdminAction
     {
         //Parameterless Constructor for MessagePack
         public BanAction()
@@ -21,7 +21,7 @@ namespace Intersect.Admin.Actions
         }
 
         [Key(1)]
-        public override AdminActions Action { get; } = AdminActions.Ban;
+        public override Enums.AdminAction Action { get; } = Enums.AdminAction.Ban;
 
         [Key(2)]
         public string Name { get; set; }

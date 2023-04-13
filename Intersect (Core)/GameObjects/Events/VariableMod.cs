@@ -7,15 +7,15 @@ using Newtonsoft.Json;
 namespace Intersect.GameObjects.Events
 {
 
-    public class VariableMod
+    public partial class VariableMod
     {
 
     }
 
-    public class IntegerVariableMod : VariableMod
+    public partial class IntegerVariableMod : VariableMod
     {
 
-        public VariableMods ModType { get; set; } = VariableMods.Set;
+        public Enums.VariableMod ModType { get; set; } = Enums.VariableMod.Set;
 
         public long Value { get; set; }
 
@@ -26,22 +26,22 @@ namespace Intersect.GameObjects.Events
 
     }
 
-    public class BooleanVariableMod : VariableMod
+    public partial class BooleanVariableMod : VariableMod
     {
 
         public bool Value { get; set; }
 
-        public VariableTypes DupVariableType { get; set; } = VariableTypes.PlayerVariable;
+        public VariableType DupVariableType { get; set; } = VariableType.PlayerVariable;
 
         [JsonProperty("DupVariableId")]
         public Guid DuplicateVariableId { get; set; }
 
     }
 
-    public class StringVariableMod : VariableMod
+    public partial class StringVariableMod : VariableMod
     {
 
-        public VariableMods ModType { get; set; } = VariableMods.Set;
+        public Enums.VariableMod ModType { get; set; } = Enums.VariableMod.Set;
 
         public string Value { get; set; }
 

@@ -1,15 +1,21 @@
-﻿using Intersect.Client.Framework.GenericClasses;
+using System;
+using System.Linq;
+
+using Intersect.Client.Framework.File_Management;
+using Intersect.Client.Framework.GenericClasses;
 using Intersect.Client.Framework.Graphics;
 using Intersect.Client.Framework.Gwen.Control;
 using Intersect.Client.Framework.Gwen.ControlInternal;
 using Intersect.Client.Framework.Gwen.Skin.Texturing;
+
+using Single = Intersect.Client.Framework.Gwen.Skin.Texturing.Single;
 
 namespace Intersect.Client.Framework.Gwen.Skin
 {
 
     #region UI element textures
 
-    public struct SkinTextures
+    public partial struct SkinTextures
     {
 
         public Bordered StatusBar;
@@ -20,7 +26,7 @@ namespace Intersect.Client.Framework.Gwen.Skin
 
         public Bordered Tooltip;
 
-        public struct _Panel
+        public partial struct _Panel
         {
 
             public Bordered Normal;
@@ -33,7 +39,7 @@ namespace Intersect.Client.Framework.Gwen.Skin
 
         }
 
-        public struct _Window
+        public partial struct _Window
         {
 
             public Bordered Normal;
@@ -49,62 +55,59 @@ namespace Intersect.Client.Framework.Gwen.Skin
             public Single CloseDisabled;
 
         }
-
-        public struct _CheckBox
+        public partial struct _FillableButton
         {
+            public Single Box;
 
-            public struct _Active
-            {
-
-                public Single Normal;
-
-                public Single Checked;
-
-            }
-
-            public struct _Disabled
-            {
-
-                public Single Normal;
-
-                public Single Checked;
-
-            }
-
-            public _Active Active;
-
-            public _Disabled Disabled;
-
+            public Single Fill;
         }
 
-        public struct _RadioButton
+        public partial struct _CheckBox
         {
 
-            public struct _Active
+            public partial struct _Baked
             {
-
                 public Single Normal;
 
                 public Single Checked;
-
             }
 
-            public struct _Disabled
-            {
+            public _Baked Active_Baked;
 
-                public Single Normal;
+            public _Baked Disabled_Baked;
 
-                public Single Checked;
+            public _FillableButton Default;
 
-            }
+            public _FillableButton Active;
 
-            public _Active Active;
+            public _FillableButton Hovered;
 
-            public _Disabled Disabled;
-
+            public _FillableButton Disabled;
         }
 
-        public struct _TextBox
+        public partial struct _RadioButton
+        {
+            public partial struct _Baked
+            {
+                public Single Normal;
+
+                public Single Checked;
+            }
+
+            public _Baked Active_Baked;
+
+            public _Baked Disabled_Baked;
+
+            public _FillableButton Default;
+
+            public _FillableButton Active;
+
+            public _FillableButton Hovered;
+
+            public _FillableButton Disabled;
+        }
+
+        public partial struct _TextBox
         {
 
             public Bordered Normal;
@@ -115,7 +118,7 @@ namespace Intersect.Client.Framework.Gwen.Skin
 
         }
 
-        public struct _Tree
+        public partial struct _Tree
         {
 
             public Bordered Background;
@@ -126,7 +129,7 @@ namespace Intersect.Client.Framework.Gwen.Skin
 
         }
 
-        public struct _ProgressBar
+        public partial struct _ProgressBar
         {
 
             public Bordered Back;
@@ -135,7 +138,7 @@ namespace Intersect.Client.Framework.Gwen.Skin
 
         }
 
-        public struct _Scroller
+        public partial struct _Scroller
         {
 
             public Bordered TrackV;
@@ -158,7 +161,7 @@ namespace Intersect.Client.Framework.Gwen.Skin
 
             public Bordered ButtonHDisabled;
 
-            public struct _Button
+            public partial struct _Button
             {
 
                 public Bordered[] Normal;
@@ -175,7 +178,7 @@ namespace Intersect.Client.Framework.Gwen.Skin
 
         }
 
-        public struct _Menu
+        public partial struct _Menu
         {
 
             public Single RightArrow;
@@ -188,14 +191,14 @@ namespace Intersect.Client.Framework.Gwen.Skin
 
             public Bordered BackgroundWithMargin;
 
-            public Bordered Hover;
+            public Bordered Hovered;
 
         }
 
-        public struct _Input
+        public partial struct _Input
         {
 
-            public struct _Button
+            public partial struct _Button
             {
 
                 public Bordered Normal;
@@ -208,7 +211,7 @@ namespace Intersect.Client.Framework.Gwen.Skin
 
             }
 
-            public struct _ComboBox
+            public partial struct _ComboBox
             {
 
                 public Bordered Normal;
@@ -219,7 +222,7 @@ namespace Intersect.Client.Framework.Gwen.Skin
 
                 public Bordered Disabled;
 
-                public struct _Button
+                public partial struct _Button
                 {
 
                     public Single Normal;
@@ -236,10 +239,10 @@ namespace Intersect.Client.Framework.Gwen.Skin
 
             }
 
-            public struct _Slider
+            public partial struct _Slider
             {
 
-                public struct _H
+                public partial struct _H
                 {
 
                     public Single Normal;
@@ -252,7 +255,7 @@ namespace Intersect.Client.Framework.Gwen.Skin
 
                 }
 
-                public struct _V
+                public partial struct _V
                 {
 
                     public Single Normal;
@@ -271,7 +274,7 @@ namespace Intersect.Client.Framework.Gwen.Skin
 
             }
 
-            public struct _ListBox
+            public partial struct _ListBox
             {
 
                 public Bordered Background;
@@ -288,10 +291,10 @@ namespace Intersect.Client.Framework.Gwen.Skin
 
             }
 
-            public struct _UpDown
+            public partial struct _UpDown
             {
 
-                public struct _Up
+                public partial struct _Up
                 {
 
                     public Single Normal;
@@ -304,7 +307,7 @@ namespace Intersect.Client.Framework.Gwen.Skin
 
                 }
 
-                public struct _Down
+                public partial struct _Down
                 {
 
                     public Single Normal;
@@ -335,10 +338,10 @@ namespace Intersect.Client.Framework.Gwen.Skin
 
         }
 
-        public struct _Tab
+        public partial struct _Tab
         {
 
-            public struct _Bottom
+            public partial struct _Bottom
             {
 
                 public Bordered Inactive;
@@ -347,7 +350,7 @@ namespace Intersect.Client.Framework.Gwen.Skin
 
             }
 
-            public struct _Top
+            public partial struct _Top
             {
 
                 public Bordered Inactive;
@@ -356,7 +359,7 @@ namespace Intersect.Client.Framework.Gwen.Skin
 
             }
 
-            public struct _Left
+            public partial struct _Left
             {
 
                 public Bordered Inactive;
@@ -365,7 +368,7 @@ namespace Intersect.Client.Framework.Gwen.Skin
 
             }
 
-            public struct _Right
+            public partial struct _Right
             {
 
                 public Bordered Inactive;
@@ -388,7 +391,7 @@ namespace Intersect.Client.Framework.Gwen.Skin
 
         }
 
-        public struct _CategoryList
+        public partial struct _CategoryList
         {
 
             public Bordered Outer;
@@ -430,12 +433,36 @@ namespace Intersect.Client.Framework.Gwen.Skin
     /// <summary>
     ///     Base textured skin.
     /// </summary>
-    public class TexturedBase : Skin.Base
+    public partial class TexturedBase : Skin.Base
     {
 
-        private readonly GameTexture mTexture;
+        public static TexturedBase FindSkin(Renderer.Base renderer, GameContentManager contentManager, string skinName)
+        {
+            var skinMap = typeof(TexturedBase).Assembly.GetTypes()
+                .Where(type => !type.IsAbstract && typeof(TexturedBase).IsAssignableFrom(type))
+                .ToDictionary(type => type.Name.ToLowerInvariant(), type => type);
+
+            if (skinMap.TryGetValue(skinName.ToLowerInvariant(), out var skinType))
+            {
+                try
+                {
+                    var skin = Activator.CreateInstance(skinType, renderer, contentManager) as TexturedBase;
+                    return skin;
+                }
+                catch
+                {
+                    // ignore
+                }
+            }
+
+            return new TexturedBase(renderer, contentManager, skinName);
+        }
+
+        protected readonly GameTexture mTexture;
 
         protected SkinTextures mTextures;
+
+        public string TextureName { get; }
 
         /// <summary>
         ///     Initializes a new instance of the <see cref="TexturedBase" /> class.
@@ -450,6 +477,16 @@ namespace Intersect.Client.Framework.Gwen.Skin
             InitializeTextures();
         }
 
+        public TexturedBase(Renderer.Base renderer, GameContentManager contentManager)
+            : this(renderer, contentManager, "defaultskin.png")
+        {
+        }
+
+        protected TexturedBase(Renderer.Base renderer, GameContentManager contentManager, string textureName)
+            : this(renderer, contentManager?.GetTexture(Framework.Content.TextureType.Gui, textureName))
+        {
+        }
+
         /// <summary>
         ///     Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
         /// </summary>
@@ -460,7 +497,7 @@ namespace Intersect.Client.Framework.Gwen.Skin
 
         #region Initialization
 
-        private void InitializeColors()
+        protected virtual void InitializeColors()
         {
             Colors.Window.TitleActive = Renderer.PixelColor(mTexture, 4 + 8 * 0, 508, Color.Red);
             Colors.Window.TitleInactive = Renderer.PixelColor(mTexture, 4 + 8 * 1, 508, Color.Yellow);
@@ -521,7 +558,7 @@ namespace Intersect.Client.Framework.Gwen.Skin
             Colors.Category.LineAlt.ButtonSelected = Renderer.PixelColor(mTexture, 4 + 8 * 25, 500, Color.Yellow);
         }
 
-        private void InitializeTextures()
+        protected virtual void InitializeTextures()
         {
             mTextures.Shadow = new Bordered(mTexture, 448, 0, 31, 31, Margin.Eight);
             mTextures.Tooltip = new Bordered(mTexture, 128, 320, 127, 31, Margin.Eight);
@@ -536,15 +573,15 @@ namespace Intersect.Client.Framework.Gwen.Skin
             mTextures.Window.Normal = new Bordered(mTexture, 0, 0, 127, 127, new Margin(8, 32, 8, 8));
             mTextures.Window.Inactive = new Bordered(mTexture, 128, 0, 127, 127, new Margin(8, 32, 8, 8));
 
-            mTextures.CheckBox.Active.Checked = new Single(mTexture, 448, 32, 15, 15);
-            mTextures.CheckBox.Active.Normal = new Single(mTexture, 464, 32, 15, 15);
-            mTextures.CheckBox.Disabled.Normal = new Single(mTexture, 448, 48, 15, 15);
-            mTextures.CheckBox.Disabled.Normal = new Single(mTexture, 464, 48, 15, 15);
+            mTextures.CheckBox.Active_Baked.Checked = new Single(mTexture, 448, 32, 15, 15);
+            mTextures.CheckBox.Active_Baked.Normal = new Single(mTexture, 464, 32, 15, 15);
+            mTextures.CheckBox.Disabled_Baked.Normal = new Single(mTexture, 448, 48, 15, 15);
+            mTextures.CheckBox.Disabled_Baked.Normal = new Single(mTexture, 464, 48, 15, 15);
 
-            mTextures.RadioButton.Active.Checked = new Single(mTexture, 448, 64, 15, 15);
-            mTextures.RadioButton.Active.Normal = new Single(mTexture, 464, 64, 15, 15);
-            mTextures.RadioButton.Disabled.Normal = new Single(mTexture, 448, 80, 15, 15);
-            mTextures.RadioButton.Disabled.Normal = new Single(mTexture, 464, 80, 15, 15);
+            mTextures.RadioButton.Active_Baked.Checked = new Single(mTexture, 448, 64, 15, 15);
+            mTextures.RadioButton.Active_Baked.Normal = new Single(mTexture, 464, 64, 15, 15);
+            mTextures.RadioButton.Disabled_Baked.Normal = new Single(mTexture, 448, 80, 15, 15);
+            mTextures.RadioButton.Disabled_Baked.Normal = new Single(mTexture, 464, 80, 15, 15);
 
             mTextures.TextBox.Normal = new Bordered(mTexture, 0, 150, 127, 21, Margin.Four);
             mTextures.TextBox.Focus = new Bordered(mTexture, 0, 172, 127, 21, Margin.Four);
@@ -553,7 +590,7 @@ namespace Intersect.Client.Framework.Gwen.Skin
             mTextures.Menu.Strip = new Bordered(mTexture, 0, 128, 127, 21, Margin.One);
             mTextures.Menu.BackgroundWithMargin = new Bordered(mTexture, 128, 128, 127, 63, new Margin(24, 8, 8, 8));
             mTextures.Menu.Background = new Bordered(mTexture, 128, 192, 127, 63, Margin.Eight);
-            mTextures.Menu.Hover = new Bordered(mTexture, 128, 256, 127, 31, Margin.Eight);
+            mTextures.Menu.Hovered = new Bordered(mTexture, 320, 320, 32, 32, Margin.Six);
             mTextures.Menu.RightArrow = new Single(mTexture, 464, 112, 15, 15);
             mTextures.Menu.Check = new Single(mTexture, 448, 112, 15, 15);
 
@@ -608,12 +645,12 @@ namespace Intersect.Client.Framework.Gwen.Skin
                 );
             }
 
-            mTextures.Input.ListBox.Background = new Bordered(mTexture, 256, 256, 63, 127, Margin.Eight);
-            mTextures.Input.ListBox.Hovered = new Bordered(mTexture, 320, 320, 31, 31, Margin.Eight);
-            mTextures.Input.ListBox.EvenLine = new Bordered(mTexture, 352, 256, 31, 31, Margin.Eight);
-            mTextures.Input.ListBox.OddLine = new Bordered(mTexture, 352, 288, 31, 31, Margin.Eight);
-            mTextures.Input.ListBox.EvenLineSelected = new Bordered(mTexture, 320, 270, 31, 31, Margin.Eight);
-            mTextures.Input.ListBox.OddLineSelected = new Bordered(mTexture, 320, 288, 31, 31, Margin.Eight);
+            mTextures.Input.ListBox.Background = new Bordered(mTexture, 256, 256, 63, 127, Margin.Six);
+            mTextures.Input.ListBox.Hovered = new Bordered(mTexture, 320, 320, 32, 32, Margin.Six);
+            mTextures.Input.ListBox.EvenLine = new Bordered(mTexture, 352, 256, 32, 32, Margin.Six);
+            mTextures.Input.ListBox.EvenLineSelected = new Bordered(mTexture, 320, 256, 32, 32, Margin.Six);
+            mTextures.Input.ListBox.OddLine = new Bordered(mTexture, 352, 288, 32, 32, Margin.Six);
+            mTextures.Input.ListBox.OddLineSelected = new Bordered(mTexture, 320, 288, 32, 32, Margin.Six);
 
             mTextures.Input.ComboBox.Normal = new Bordered(mTexture, 384, 336, 127, 31, new Margin(8, 8, 32, 8));
             mTextures.Input.ComboBox.Hover = new Bordered(mTexture, 384, 336 + 32, 127, 31, new Margin(8, 8, 32, 8));
@@ -739,8 +776,11 @@ namespace Intersect.Client.Framework.Gwen.Skin
                 return;
             }
 
-            //if (submenuOpen || control.IsHovered)
-            //    mTextures.Menu.Hover.Draw(Renderer, control.RenderBounds, control.RenderColor);
+            if (submenuOpen || control.IsHovered)
+            {
+                mTextures.Menu.Hovered.Draw(Renderer, control.RenderBounds, control.RenderColor);
+                return;
+            }
 
             if (isChecked)
             {
@@ -867,63 +907,10 @@ namespace Intersect.Client.Framework.Gwen.Skin
 
         public override void DrawRadioButton(Control.Base control, bool selected, bool depressed)
         {
-            if (selected)
-            {
-                if (control.IsDisabled)
-                {
-                    mTextures.RadioButton.Disabled.Checked.Draw(Renderer, control.RenderBounds, control.RenderColor);
-                }
-                else
-                {
-                    mTextures.RadioButton.Active.Checked.Draw(Renderer, control.RenderBounds, control.RenderColor);
-                }
-            }
-            else
-            {
-                if (control.IsDisabled)
-                {
-                    mTextures.RadioButton.Disabled.Normal.Draw(Renderer, control.RenderBounds, control.RenderColor);
-                }
-                else
-                {
-                    mTextures.RadioButton.Active.Normal.Draw(Renderer, control.RenderBounds, control.RenderColor);
-                }
-            }
-        }
-
-        public override void DrawCheckBox(Control.Base control, bool selected, bool depressed)
-        {
-            GameTexture renderImg = null;
-            if (selected &&
-                control.IsDisabled &&
-                ((CheckBox) control).GetImage(Control.CheckBox.ControlState.CheckedDisabled) != null)
-            {
-                renderImg = ((CheckBox) control).GetImage(Control.CheckBox.ControlState.CheckedDisabled);
-            }
-            else if (selected &&
-                     !control.IsDisabled &&
-                     ((CheckBox) control).GetImage(Control.CheckBox.ControlState.CheckedNormal) != null)
-            {
-                renderImg = ((CheckBox) control).GetImage(Control.CheckBox.ControlState.CheckedNormal);
-            }
-            else if (!selected &&
-                     control.IsDisabled &&
-                     ((CheckBox) control).GetImage(Control.CheckBox.ControlState.Disabled) != null)
-            {
-                renderImg = ((CheckBox) control).GetImage(Control.CheckBox.ControlState.Disabled);
-            }
-            else if (!selected &&
-                     !control.IsDisabled &&
-                     ((CheckBox) control).GetImage(Control.CheckBox.ControlState.Normal) != null)
-            {
-                renderImg = ((CheckBox) control).GetImage(Control.CheckBox.ControlState.Normal);
-            }
-
-            if (renderImg != null)
+            if (TryGetOverrideTexture(control as CheckBox, selected, depressed, out var overrideTexture))
             {
                 Renderer.DrawColor = control.RenderColor;
-                Renderer.DrawTexturedRect(renderImg, control.RenderBounds, control.RenderColor, 0, 0);
-
+                Renderer.DrawTexturedRect(overrideTexture, control.RenderBounds, control.RenderColor, 0, 0);
                 return;
             }
 
@@ -931,22 +918,71 @@ namespace Intersect.Client.Framework.Gwen.Skin
             {
                 if (control.IsDisabled)
                 {
-                    mTextures.CheckBox.Disabled.Checked.Draw(Renderer, control.RenderBounds, control.RenderColor);
+                    mTextures.RadioButton.Disabled_Baked.Checked.Draw(Renderer, control.RenderBounds, control.RenderColor);
                 }
                 else
                 {
-                    mTextures.CheckBox.Active.Checked.Draw(Renderer, control.RenderBounds, control.RenderColor);
+                    mTextures.RadioButton.Active_Baked.Checked.Draw(Renderer, control.RenderBounds, control.RenderColor);
                 }
             }
             else
             {
                 if (control.IsDisabled)
                 {
-                    mTextures.CheckBox.Disabled.Normal.Draw(Renderer, control.RenderBounds, control.RenderColor);
+                    mTextures.RadioButton.Disabled_Baked.Normal.Draw(Renderer, control.RenderBounds, control.RenderColor);
                 }
                 else
                 {
-                    mTextures.CheckBox.Active.Normal.Draw(Renderer, control.RenderBounds, control.RenderColor);
+                    mTextures.RadioButton.Active_Baked.Normal.Draw(Renderer, control.RenderBounds, control.RenderColor);
+                }
+            }
+        }
+
+        protected bool TryGetOverrideTexture(CheckBox control, bool selected, bool pressed, out GameTexture overrideTexture)
+        {
+            CheckBox.ControlState controlState = CheckBox.ControlState.Normal;
+            if (selected)
+            {
+                controlState = control.IsDisabled ? CheckBox.ControlState.CheckedDisabled : CheckBox.ControlState.CheckedNormal;
+            }
+            else if (control.IsDisabled)
+            {
+                controlState = CheckBox.ControlState.Disabled;
+            }
+
+            overrideTexture = control.GetImage(controlState);
+            return overrideTexture != default;
+        }
+
+        public override void DrawCheckBox(Control.Base control, bool selected, bool depressed)
+        {
+            if (TryGetOverrideTexture(control as CheckBox, selected, depressed, out var overrideTexture))
+            {
+                Renderer.DrawColor = control.RenderColor;
+                Renderer.DrawTexturedRect(overrideTexture, control.RenderBounds, control.RenderColor, 0, 0);
+                return;
+            }
+
+            if (selected)
+            {
+                if (control.IsDisabled)
+                {
+                    mTextures.CheckBox.Disabled_Baked.Checked.Draw(Renderer, control.RenderBounds, control.RenderColor);
+                }
+                else
+                {
+                    mTextures.CheckBox.Active_Baked.Checked.Draw(Renderer, control.RenderBounds, control.RenderColor);
+                }
+            }
+            else
+            {
+                if (control.IsDisabled)
+                {
+                    mTextures.CheckBox.Disabled_Baked.Normal.Draw(Renderer, control.RenderBounds, control.RenderColor);
+                }
+                else
+                {
+                    mTextures.CheckBox.Active_Baked.Normal.Draw(Renderer, control.RenderBounds, control.RenderColor);
                 }
             }
         }
@@ -1504,31 +1540,27 @@ namespace Intersect.Client.Framework.Gwen.Skin
                 return;
             }
 
+            if (control.IsHovered)
+            {
+                mTextures.Input.ListBox.Hovered.Draw(Renderer, control.RenderBounds, control.RenderColor);
+                return;
+            }
+
             if (selected)
             {
                 if (even)
                 {
                     mTextures.Input.ListBox.EvenLineSelected.Draw(Renderer, control.RenderBounds, control.RenderColor);
-
                     return;
                 }
 
                 mTextures.Input.ListBox.OddLineSelected.Draw(Renderer, control.RenderBounds, control.RenderColor);
-
-                return;
-            }
-
-            if (control.IsHovered)
-            {
-                mTextures.Input.ListBox.Hovered.Draw(Renderer, control.RenderBounds, control.RenderColor);
-
                 return;
             }
 
             if (even)
             {
                 mTextures.Input.ListBox.EvenLine.Draw(Renderer, control.RenderBounds, control.RenderColor);
-
                 return;
             }
 
@@ -1685,9 +1717,8 @@ namespace Intersect.Client.Framework.Gwen.Skin
 
         public override void DrawToolTip(Control.Base control)
         {
-            if (control.GetType() == typeof(Label))
+            if (control is Label tooltip)
             {
-                var tooltip = (Label) control;
                 if (tooltip.ToolTipBackground != null)
                 {
                     var renderImg = tooltip.ToolTipBackground;
@@ -1785,6 +1816,11 @@ namespace Intersect.Client.Framework.Gwen.Skin
             bool disabled
         )
         {
+            if (!(control is Button button))
+            {
+                return;
+            }
+
             var i = 0;
             if (direction == Pos.Top)
             {
@@ -1803,53 +1839,53 @@ namespace Intersect.Client.Framework.Gwen.Skin
 
             GameTexture renderImg = null;
 
-            if (disabled && ((Button) control).GetImage(Control.Button.ControlState.Disabled) != null)
+            if (disabled && button.GetImage(Button.ControlState.Disabled) != null)
             {
-                renderImg = ((Button) control).GetImage(Control.Button.ControlState.Disabled);
+                renderImg = button.GetImage(Button.ControlState.Disabled);
             }
-            else if (depressed && ((Button) control).GetImage(Control.Button.ControlState.Clicked) != null)
+            else if (depressed && button.GetImage(Button.ControlState.Clicked) != null)
             {
-                renderImg = ((Button) control).GetImage(Control.Button.ControlState.Clicked);
+                renderImg = button.GetImage(Button.ControlState.Clicked);
             }
-            else if (hovered && ((Button) control).GetImage(Control.Button.ControlState.Hovered) != null)
+            else if (hovered && button.GetImage(Button.ControlState.Hovered) != null)
             {
-                renderImg = ((Button) control).GetImage(Control.Button.ControlState.Hovered);
+                renderImg = button.GetImage(Button.ControlState.Hovered);
             }
-            else if (((Button) control).GetImage(Control.Button.ControlState.Normal) != null)
+            else if (button.GetImage(Button.ControlState.Normal) != null)
             {
-                renderImg = ((Button) control).GetImage(Control.Button.ControlState.Normal);
+                renderImg = button.GetImage(Button.ControlState.Normal);
             }
 
             if (renderImg != null)
             {
-                Renderer.DrawColor = control.RenderColor;
-                Renderer.DrawTexturedRect(renderImg, control.RenderBounds, control.RenderColor);
+                Renderer.DrawColor = button.RenderColor;
+                Renderer.DrawTexturedRect(renderImg, button.RenderBounds, button.RenderColor);
 
                 return;
             }
 
             if (disabled)
             {
-                mTextures.Scroller.Button.Disabled[i].Draw(Renderer, control.RenderBounds, control.RenderColor);
+                mTextures.Scroller.Button.Disabled[i].Draw(Renderer, button.RenderBounds, button.RenderColor);
 
                 return;
             }
 
             if (depressed)
             {
-                mTextures.Scroller.Button.Down[i].Draw(Renderer, control.RenderBounds, control.RenderColor);
+                mTextures.Scroller.Button.Down[i].Draw(Renderer, button.RenderBounds, button.RenderColor);
 
                 return;
             }
 
             if (hovered)
             {
-                mTextures.Scroller.Button.Hover[i].Draw(Renderer, control.RenderBounds, control.RenderColor);
+                mTextures.Scroller.Button.Hover[i].Draw(Renderer, button.RenderBounds, button.RenderColor);
 
                 return;
             }
 
-            mTextures.Scroller.Button.Normal[i].Draw(Renderer, control.RenderBounds, control.RenderColor);
+            mTextures.Scroller.Button.Normal[i].Draw(Renderer, button.RenderBounds, button.RenderColor);
         }
 
         public override void DrawComboBoxArrow(Control.Base control, bool hovered, bool down, bool open, bool disabled)
@@ -2022,54 +2058,59 @@ namespace Intersect.Client.Framework.Gwen.Skin
 
         public override void DrawWindowCloseButton(Control.Base control, bool depressed, bool hovered, bool disabled)
         {
+            if (!(control is Button button))
+            {
+                return;
+            }
+
             GameTexture renderImg = null;
-            if (disabled && ((Button) control).GetImage(Control.Button.ControlState.Disabled) != null)
+            if (disabled && button.GetImage(Button.ControlState.Disabled) != null)
             {
-                renderImg = ((Button) control).GetImage(Control.Button.ControlState.Disabled);
+                renderImg = button.GetImage(Button.ControlState.Disabled);
             }
-            else if (depressed && ((Button) control).GetImage(Control.Button.ControlState.Clicked) != null)
+            else if (depressed && button.GetImage(Button.ControlState.Clicked) != null)
             {
-                renderImg = ((Button) control).GetImage(Control.Button.ControlState.Clicked);
+                renderImg = button.GetImage(Button.ControlState.Clicked);
             }
-            else if (hovered && ((Button) control).GetImage(Control.Button.ControlState.Hovered) != null)
+            else if (hovered && button.GetImage(Button.ControlState.Hovered) != null)
             {
-                renderImg = ((Button) control).GetImage(Control.Button.ControlState.Hovered);
+                renderImg = button.GetImage(Button.ControlState.Hovered);
             }
-            else if (((Button) control).GetImage(Control.Button.ControlState.Normal) != null)
+            else if (button.GetImage(Button.ControlState.Normal) != null)
             {
-                renderImg = ((Button) control).GetImage(Control.Button.ControlState.Normal);
+                renderImg = button.GetImage(Button.ControlState.Normal);
             }
 
             if (renderImg != null)
             {
-                Renderer.DrawColor = control.RenderColor;
-                Renderer.DrawTexturedRect(renderImg, control.RenderBounds, control.RenderColor);
+                Renderer.DrawColor = button.RenderColor;
+                Renderer.DrawTexturedRect(renderImg, button.RenderBounds, button.RenderColor);
 
                 return;
             }
 
             if (disabled)
             {
-                mTextures.Window.CloseDisabled.Draw(Renderer, control.RenderBounds);
+                mTextures.Window.CloseDisabled.Draw(Renderer, button.RenderBounds);
 
                 return;
             }
 
             if (depressed)
             {
-                mTextures.Window.CloseDown.Draw(Renderer, control.RenderBounds);
+                mTextures.Window.CloseDown.Draw(Renderer, button.RenderBounds);
 
                 return;
             }
 
             if (hovered)
             {
-                mTextures.Window.CloseHover.Draw(Renderer, control.RenderBounds);
+                mTextures.Window.CloseHover.Draw(Renderer, button.RenderBounds);
 
                 return;
             }
 
-            mTextures.Window.Close.Draw(Renderer, control.RenderBounds);
+            mTextures.Window.Close.Draw(Renderer, button.RenderBounds);
         }
 
         public override void DrawSliderButton(Control.Base control, bool depressed, bool horizontal)

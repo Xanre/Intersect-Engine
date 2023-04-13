@@ -9,12 +9,13 @@ using Intersect.Client.General;
 using Intersect.Client.Interface.Shared;
 using Intersect.Client.Localization;
 using Intersect.Client.Networking;
+using Intersect.Logging;
 using Intersect.Network;
 
 namespace Intersect.Client.Interface.Menu
 {
 
-    public class MainMenu : MutableInterface
+    public partial class MainMenu : MutableInterface
     {
 
         public delegate void NetworkStatusHandler();
@@ -44,9 +45,9 @@ namespace Intersect.Client.Interface.Menu
 
         private readonly ImagePanel mMenuWindow;
 
-        private readonly Button mOptionsButton;
+        private readonly Button mSettingsButton;
 
-        private readonly OptionsWindow mOptionsWindow;
+        private readonly SettingsWindow mSettingsWindow;
 
         private readonly Button mRegisterButton;
 
@@ -92,41 +93,41 @@ namespace Intersect.Client.Interface.Menu
 
             //Menu Header
             mMenuHeader = new Label(mMenuWindow, "Title");
-            mMenuHeader.SetText(Strings.MainMenu.title);
+            mMenuHeader.SetText(Strings.MainMenu.Title);
 
             //Login Button
             mLoginButton = new Button(mMenuWindow, "LoginButton");
-            mLoginButton.SetText(Strings.MainMenu.login);
+            mLoginButton.SetText(Strings.MainMenu.Login);
             mLoginButton.Clicked += LoginButton_Clicked;
 
             //Register Button
             mRegisterButton = new Button(mMenuWindow, "RegisterButton");
-            mRegisterButton.SetText(Strings.MainMenu.register);
+            mRegisterButton.SetText(Strings.MainMenu.Register);
             mRegisterButton.Clicked += RegisterButton_Clicked;
 
             //Credits Button
             mCreditsButton = new Button(mMenuWindow, "CreditsButton");
-            mCreditsButton.SetText(Strings.MainMenu.credits);
+            mCreditsButton.SetText(Strings.MainMenu.Credits);
             mCreditsButton.Clicked += CreditsButton_Clicked;
 
             //Exit Button
             mExitButton = new Button(mMenuWindow, "ExitButton");
-            mExitButton.SetText(Strings.MainMenu.exit);
+            mExitButton.SetText(Strings.MainMenu.Exit);
             mExitButton.Clicked += ExitButton_Clicked;
 
-            //Options Button
-            mOptionsButton = new Button(mMenuWindow, "OptionsButton");
-            mOptionsButton.Clicked += OptionsButton_Clicked;
-            mOptionsButton.SetText(Strings.MainMenu.options);
-            if (!string.IsNullOrEmpty(Strings.MainMenu.optionstooltip))
+            //Settings Button
+            mSettingsButton = new Button(mMenuWindow, "SettingsButton");
+            mSettingsButton.Clicked += SettingsButton_Clicked;
+            mSettingsButton.SetText(Strings.MainMenu.Settings);
+            if (!string.IsNullOrEmpty(Strings.MainMenu.SettingsTooltip))
             {
-                mOptionsButton.SetToolTipText(Strings.MainMenu.optionstooltip);
+                mSettingsButton.SetToolTipText(Strings.MainMenu.SettingsTooltip);
             }
 
             mMenuWindow.LoadJsonUi(GameContentManager.UI.Menu, Graphics.Renderer.GetResolutionString());
 
-            //Options Controls
-            mOptionsWindow = new OptionsWindow(menuCanvas, this, mMenuWindow);
+            //Settings Controls
+            mSettingsWindow = new SettingsWindow(menuCanvas, this, null);
 
             //Login Controls
             mLoginWindow = new LoginWindow(menuCanvas, this, mMenuWindow);
@@ -191,14 +192,14 @@ namespace Intersect.Client.Interface.Menu
                 mSelectCharacterWindow.Update();
             }
 
-            mOptionsWindow.Update();
+            mSettingsWindow.Update();
         }
 
         public void Reset()
         {
             mLoginWindow.Hide();
             mRegisterWindow.Hide();
-            mOptionsWindow.Hide();
+            mSettingsWindow.Hide();
             mCreditsWindow.Hide();
             mForgotPasswordWindow.Hide();
             mResetPasswordWindow.Hide();
@@ -213,19 +214,19 @@ namespace Intersect.Client.Interface.Menu
             }
 
             mMenuWindow.Show();
-            mOptionsButton.Show();
+            mSettingsButton.Show();
         }
 
         public void Show()
         {
             mMenuWindow.IsHidden = false;
-            mOptionsButton.IsHidden = false;
+            mSettingsButton.IsHidden = false;
         }
 
         public void Hide()
         {
             mMenuWindow.IsHidden = true;
-            mOptionsButton.IsHidden = true;
+            mSettingsButton.IsHidden = true;
         }
 
         public void NotifyOpenCharacterSelection(List<Character> characters)
@@ -261,7 +262,7 @@ namespace Intersect.Client.Interface.Menu
             Hide();
             mLoginWindow.Hide();
             mRegisterWindow.Hide();
-            mOptionsWindow.Hide();
+            mSettingsWindow.Hide();
             mCreateCharacterWindow.Hide();
             mSelectCharacterWindow.Show();
             mShouldOpenCharacterSelection = false;
@@ -277,7 +278,7 @@ namespace Intersect.Client.Interface.Menu
             Hide();
             mLoginWindow.Hide();
             mRegisterWindow.Hide();
-            mOptionsWindow.Hide();
+            mSettingsWindow.Hide();
             mSelectCharacterWindow.Hide();
             mCreateCharacterWindow.Show();
             mCreateCharacterWindow.Init();
@@ -304,14 +305,15 @@ namespace Intersect.Client.Interface.Menu
             mCreditsWindow.Show();
         }
 
-        void OptionsButton_Clicked(Base sender, ClickedEventArgs arguments)
+        void SettingsButton_Clicked(Base sender, ClickedEventArgs arguments)
         {
             Hide();
-            mOptionsWindow.Show();
+            mSettingsWindow.Show(true);
         }
 
         void ExitButton_Clicked(Base sender, ClickedEventArgs arguments)
         {
+            Log.Info("User clicked exit button.");
             Globals.IsRunning = false;
         }
 

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Security.Cryptography;
 using System.Text;
 
@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore;
 namespace Intersect.Server.Database.PlayerData.SeedData
 {
 
-    public class SeedUsers : SeedData<User>
+    public partial class SeedUsers : SeedData<User>
     {
 
         private static string GenerateSalt(RandomNumberGenerator rng)
@@ -118,10 +118,10 @@ namespace Intersect.Server.Database.PlayerData.SeedData
                         player.Equipment[i] = -1;
                     }
 
-                    player.SetVital(Vitals.Health, 10);
-                    player.SetVital(Vitals.Mana, 10);
+                    player.SetVital(Vital.Health, 10);
+                    player.SetVital(Vital.Mana, 10);
 
-                    for (var i = 0; i < (int) Stats.StatCount; i++)
+                    for (var i = 0; i < (int) Stat.StatCount; i++)
                     {
                         player.Stat[i].BaseStat = 0;
                     }
@@ -134,7 +134,7 @@ namespace Intersect.Server.Database.PlayerData.SeedData
 
     }
 
-    public static class RandomNumberGeneratorExtensions
+    public static partial class RandomNumberGeneratorExtensions
     {
 
         public static int NextInt(

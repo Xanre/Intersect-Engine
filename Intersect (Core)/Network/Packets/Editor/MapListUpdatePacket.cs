@@ -6,7 +6,7 @@ using MessagePack;
 namespace Intersect.Network.Packets.Editor
 {
     [MessagePackObject]
-    public class MapListUpdatePacket : EditorPacket
+    public partial class MapListUpdatePacket : EditorPacket
     {
         //Parameterless Constructor for MessagePack
         public MapListUpdatePacket()
@@ -14,7 +14,7 @@ namespace Intersect.Network.Packets.Editor
         }
 
         public MapListUpdatePacket(
-            MapListUpdates updateType,
+            MapListUpdate updateType,
             int targetType,
             Guid targetId,
             int parentType,
@@ -31,7 +31,7 @@ namespace Intersect.Network.Packets.Editor
         }
 
         [Key(0)]
-        public MapListUpdates UpdateType { get; set; }
+        public MapListUpdate UpdateType { get; set; }
 
         //If applicable, this is the object we are renaming, moving, deleting etc
         [Key(1)]

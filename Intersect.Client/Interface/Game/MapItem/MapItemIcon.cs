@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 using Intersect.Client.Framework.File_Management;
 using Intersect.Client.Framework.GenericClasses;
@@ -7,13 +7,14 @@ using Intersect.Client.Framework.Gwen.Control.EventArguments;
 using Intersect.Client.Framework.Gwen.Input;
 using Intersect.Client.Framework.Input;
 using Intersect.Client.General;
+using Intersect.Client.Interface.Game.DescriptionWindows;
 using Intersect.Client.Items;
 using Intersect.GameObjects;
 
 namespace Intersect.Client.Interface.Game.Inventory
 {
 
-    public class MapItemIcon
+    public partial class MapItemIcon
     {
 
         public ImagePanel Container;
@@ -28,7 +29,7 @@ namespace Intersect.Client.Interface.Game.Inventory
 
         private MapItemWindow mMapItemWindow;
 
-        private ItemDescWindow mDescWindow;
+        private ItemDescriptionWindow mDescWindow;
 
         public MapItemIcon(MapItemWindow window)
         {
@@ -50,7 +51,7 @@ namespace Intersect.Client.Interface.Game.Inventory
                 return;
             }
 
-            Globals.Me.TryPickupItem(MapId, TileIndex, MyItem.UniqueId);
+            Globals.Me.TryPickupItem(MapId, TileIndex, MyItem.Id);
         }
 
         void pnl_HoverLeave(Base sender, EventArgs arguments)
@@ -74,7 +75,7 @@ namespace Intersect.Client.Interface.Game.Inventory
                 return;
             }
 
-            if (Globals.InputManager.MouseButtonDown(GameInput.MouseButtons.Left))
+            if (Globals.InputManager.MouseButtonDown(MouseButtons.Left))
             {
                 return;
             }
@@ -84,9 +85,9 @@ namespace Intersect.Client.Interface.Game.Inventory
                 mDescWindow.Dispose();
                 mDescWindow = null;
             }
-            mDescWindow = new ItemDescWindow(
+            mDescWindow = new ItemDescriptionWindow(
                 ItemBase.Get(MyItem.ItemId), MyItem.Quantity, mMapItemWindow.X,
-                mMapItemWindow.Y, MyItem.StatBuffs
+                mMapItemWindow.Y, MyItem.ItemProperties
            );
         }
 
@@ -113,7 +114,7 @@ namespace Intersect.Client.Interface.Game.Inventory
             var item = ItemBase.Get(MyItem.ItemId);
             if (item != null)
             {
-                var itemTex = Globals.ContentManager.GetTexture(GameContentManager.TextureType.Item, item.Icon);
+                var itemTex = Globals.ContentManager.GetTexture(Framework.Content.TextureType.Item, item.Icon);
                 if (itemTex != null)
                 {
                     Pnl.RenderColor = item.Color;

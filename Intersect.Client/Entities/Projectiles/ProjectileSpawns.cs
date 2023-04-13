@@ -1,7 +1,7 @@
 ﻿using System;
-
-using Intersect.Client.General;
+using Intersect.Enums;
 using Intersect.GameObjects;
+using Intersect.Utilities;
 
 namespace Intersect.Client.Entities.Projectiles
 {
@@ -13,7 +13,7 @@ namespace Intersect.Client.Entities.Projectiles
 
         public bool AutoRotate;
 
-        public int Dir;
+        public Direction Dir;
 
         public int Distance;
 
@@ -28,13 +28,13 @@ namespace Intersect.Client.Entities.Projectiles
 
         public Guid SpawnMapId;
 
-        public long SpawnTime = Globals.System.GetTimeMs();
+        public long SpawnTime = Timing.Global.Milliseconds;
 
         public int SpawnX;
 
         public int SpawnY;
 
-        public long TransmittionTimer = Globals.System.GetTimeMs();
+        public long TransmittionTimer = Timing.Global.Milliseconds;
 
         public int X;
 
@@ -43,7 +43,7 @@ namespace Intersect.Client.Entities.Projectiles
         public int Z;
 
         public ProjectileSpawns(
-            int dir,
+            Direction dir,
             int x,
             int y,
             int z,
@@ -65,7 +65,7 @@ namespace Intersect.Client.Entities.Projectiles
             Anim = new Animation(animBase, true, autoRotate, Z, parent);
             AutoRotate = autoRotate;
             ProjectileBase = projectileBase;
-            TransmittionTimer = Globals.System.GetTimeMs() +
+            TransmittionTimer = Timing.Global.Milliseconds +
                                 (long) ((float) ProjectileBase.Speed / (float) ProjectileBase.Range);
         }
 

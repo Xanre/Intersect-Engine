@@ -6,14 +6,14 @@ using MessagePack;
 namespace Intersect.Network.Packets.Server
 {
     [MessagePackObject]
-    public class EntityStatsPacket : IntersectPacket
+    public partial class EntityStatsPacket : IntersectPacket
     {
         //Parameterless Constructor for MessagePack
         public EntityStatsPacket()
         {
         }
 
-        public EntityStatsPacket(Guid id, EntityTypes type, Guid mapId, int[] stats)
+        public EntityStatsPacket(Guid id, EntityType type, Guid mapId, int[] stats)
         {
             Id = id;
             Type = type;
@@ -25,7 +25,7 @@ namespace Intersect.Network.Packets.Server
         public Guid Id { get; set; }
 
         [Key(1)]
-        public EntityTypes Type { get; set; }
+        public EntityType Type { get; set; }
 
         [Key(2)]
         public Guid MapId { get; set; }

@@ -1,7 +1,8 @@
-﻿using System;
+using System;
 using System.IO;
 
 using Intersect.Client.Framework.Audio;
+using Intersect.Client.Framework.Content;
 using Intersect.Client.General;
 using Intersect.Client.Interface.Game.Chat;
 using Intersect.Client.Localization;
@@ -12,20 +13,28 @@ using Microsoft.Xna.Framework.Audio;
 namespace Intersect.Client.MonoGame.Audio
 {
 
-    public class MonoSoundSource : GameAudioSource
+    public partial class MonoSoundSource : GameAudioSource
     {
-
         private readonly string mPath;
         private readonly string mRealPath;
+        private Func<Stream> mCreateStream;
 
         private int mInstanceCount;
 
         private SoundEffect mSound;
 
-        public MonoSoundSource(string path, string realPath)
+        public MonoSoundSource(string path, string realPath, string name = default)
         {
+            
             mPath = path;
             mRealPath = realPath;
+            Name = string.IsNullOrWhiteSpace(name) ? string.Empty : name;
+        }
+
+        public MonoSoundSource(Func<Stream> createStream, string name = default)
+        {
+            mCreateStream = createStream;
+            Name = string.IsNullOrWhiteSpace(name) ? string.Empty : name;
         }
 
         public SoundEffect Effect
@@ -63,7 +72,14 @@ namespace Intersect.Client.MonoGame.Audio
         {
             try
             {
-                if (Globals.ContentManager.SoundPacks != null && Globals.ContentManager.SoundPacks.Contains(mRealPath))
+                if (mCreateStream != null)
+                {
+                    using (var stream = mCreateStream())
+                    {
+                        mSound = SoundEffect.FromStream(stream);
+                    }
+                }
+                else if (Globals.ContentManager.SoundPacks != null && Globals.ContentManager.SoundPacks.Contains(mRealPath))
                 {
                     using (var stream = Globals.ContentManager.SoundPacks.GetAsset(mRealPath))
                     {
@@ -81,7 +97,7 @@ namespace Intersect.Client.MonoGame.Audio
             }
             catch (Exception exception)
             {
-                Log.Error($"Error loading '{mPath}'.", exception);
+                Log.Error(exception, $"Error loading '{mPath}'.");
                 ChatboxMsg.AddMessage(
                     new ChatboxMsg(
                         $"{Strings.Errors.LoadFile.ToString(Strings.Words.lcase_sound)} [{mPath}]",

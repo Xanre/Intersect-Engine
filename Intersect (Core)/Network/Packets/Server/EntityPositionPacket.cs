@@ -6,7 +6,7 @@ using MessagePack;
 namespace Intersect.Network.Packets.Server
 {
     [MessagePackObject]
-    public class EntityPositionPacket : AbstractTimedPacket
+    public partial class EntityPositionPacket : AbstractTimedPacket
     {
         //Parameterless Constructor for MessagePack
         public EntityPositionPacket()
@@ -15,7 +15,7 @@ namespace Intersect.Network.Packets.Server
 
         public EntityPositionPacket(
             Guid id,
-            EntityTypes type,
+            EntityType type,
             Guid mapId,
             byte x,
             byte y,
@@ -38,7 +38,7 @@ namespace Intersect.Network.Packets.Server
         public Guid Id { get; set; }
 
         [Key(4)]
-        public EntityTypes Type { get; set; }
+        public EntityType Type { get; set; }
 
         [Key(5)]
         public Guid MapId { get; set; }

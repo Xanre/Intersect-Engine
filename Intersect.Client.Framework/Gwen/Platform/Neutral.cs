@@ -10,7 +10,7 @@ namespace Intersect.Client.Framework.Gwen.Platform
     /// <summary>
     ///     Platform-agnostic utility functions.
     /// </summary>
-    public static class Neutral
+    public static partial class Neutral
     {
 
         private static DateTime sFirstTime = DateTime.Now;
@@ -37,7 +37,7 @@ namespace Intersect.Client.Framework.Gwen.Platform
                 {
                     try
                     {
-                        if (GameClipboard.Instance == null || !GameClipboard.Instance.ContainsText())
+                        if (GameClipboard.Instance == null || GameClipboard.Instance.IsEmpty)
                         {
                             return;
                         }

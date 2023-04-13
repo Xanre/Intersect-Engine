@@ -13,7 +13,7 @@ using Intersect.GameObjects;
 namespace Intersect.Editor.General
 {
 
-    public static class Globals
+    public static partial class Globals
     {
 
         public static int AutotileFrame = 0;
@@ -53,7 +53,7 @@ namespace Intersect.Editor.General
 
         public static TilesetBase CurrentTileset = null;
 
-        public static int CurrentTool = (int) EditingTool.Pen;
+        public static int CurrentTool = (int) EditingTool.Brush;
 
         public static int CurSelH;
 
@@ -134,7 +134,7 @@ namespace Intersect.Editor.General
         //Game Object Editors
         public static FrmResource ResourceEditor;
 
-        public static int SavedTool = (int) EditingTool.Pen;
+        public static int SavedTool = (int) EditingTool.Brush;
 
         public static bool SavingOnClose;
 
@@ -142,8 +142,6 @@ namespace Intersect.Editor.General
 
         //Selection Moving Copying and Pasting
         public static int SelectionType = (int) SelectionTypes.AllLayers;
-
-        public static Core.Sys System = new Core.Sys();
 
         public static int TileDragX = 0;
 
@@ -183,15 +181,15 @@ namespace Intersect.Editor.General
         {
             switch (statnum)
             {
-                case (int) Stats.Attack:
+                case (int) Stat.Attack:
                     return "Attack";
-                case (int) Stats.AbilityPower:
+                case (int) Stat.AbilityPower:
                     return "Ability Power";
-                case (int) Stats.Defense:
+                case (int) Stat.Defense:
                     return "Defense";
-                case (int) Stats.MagicResist:
+                case (int) Stat.MagicResist:
                     return "Magic Resist";
-                case (int) Stats.Speed:
+                case (int) Stat.Speed:
                     return "Speed";
                 default:
                     return "Invalid Stat";

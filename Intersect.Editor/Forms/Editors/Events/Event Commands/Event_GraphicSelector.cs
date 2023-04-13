@@ -6,7 +6,6 @@ using System.Windows.Forms;
 using Intersect.Editor.Content;
 using Intersect.Editor.Localization;
 using Intersect.Enums;
-using Intersect.GameObjects;
 using Intersect.GameObjects.Events;
 
 namespace Intersect.Editor.Forms.Editors.Events.Event_Commands
@@ -93,14 +92,20 @@ namespace Intersect.Editor.Forms.Editors.Events.Event_Commands
                 cmbGraphic.Show();
                 lblGraphic.Show();
                 cmbGraphic.Items.Clear();
-                cmbGraphic.Items.AddRange(
-                    GameContentManager.GetSmartSortedTextureNames(GameContentManager.TextureType.Entity)
-                );
 
-                if (cmbGraphic.Items.Count > 0)
+                var sortedTextures =
+                    GameContentManager.GetSmartSortedTextureNames(GameContentManager.TextureType.Entity);
+
+                if (sortedTextures.Length > 0)
                 {
-                    cmbGraphic.SelectedIndex = 0;
+                    cmbGraphic.Items.AddRange(sortedTextures);
                 }
+                else
+                {
+                    cmbGraphic.Items.Add(Strings.General.None);
+                }
+
+                cmbGraphic.SelectedIndex = 0;
             }
             else if (cmbGraphicType.SelectedIndex == 2) //Tileset
             {
@@ -110,21 +115,20 @@ namespace Intersect.Editor.Forms.Editors.Events.Event_Commands
                 lblGraphic.Show();
                 cmbGraphic.Show();
                 cmbGraphic.Items.Clear();
-                foreach (var filename in TilesetBase.Names)
+
+                var sortedTextures =
+                    GameContentManager.GetSmartSortedTextureNames(GameContentManager.TextureType.Tileset);
+
+                if (sortedTextures.Length > 0)
                 {
-                    if (File.Exists("resources/tilesets/" + filename))
-                    {
-                        cmbGraphic.Items.Add(filename);
-                    }
-                    else
-                    {
-                    }
+                    cmbGraphic.Items.AddRange(sortedTextures);
+                }
+                else
+                {
+                    cmbGraphic.Items.Add(Strings.General.None);
                 }
 
-                if (cmbGraphic.Items.Count > 0)
-                {
-                    cmbGraphic.SelectedIndex = 0;
-                }
+                cmbGraphic.SelectedIndex = 0;
             }
         }
 
@@ -140,34 +144,39 @@ namespace Intersect.Editor.Forms.Editors.Events.Event_Commands
             {
                 cmbGraphic.Show();
                 lblGraphic.Show();
-                cmbGraphic.Items.AddRange(
-                    GameContentManager.GetSmartSortedTextureNames(GameContentManager.TextureType.Entity)
-                );
 
-                if (cmbGraphic.Items.Count > 0)
+                var sortedTextures =
+                    GameContentManager.GetSmartSortedTextureNames(GameContentManager.TextureType.Entity);
+
+                if (sortedTextures.Length > 0)
                 {
-                    cmbGraphic.SelectedIndex = 0;
+                    cmbGraphic.Items.AddRange(sortedTextures);
                 }
+                else
+                {
+                    cmbGraphic.Items.Add(Strings.General.None);
+                }
+
+                cmbGraphic.SelectedIndex = 0;
             }
             else if (cmbGraphicType.SelectedIndex == 2) //Tileset
             {
                 lblGraphic.Show();
                 cmbGraphic.Show();
-                foreach (var filename in TilesetBase.Names)
+
+                var sortedTextures =
+                    GameContentManager.GetSmartSortedTextureNames(GameContentManager.TextureType.Tileset);
+
+                if (sortedTextures.Length > 0)
                 {
-                    if (File.Exists("resources/tilesets/" + filename))
-                    {
-                        cmbGraphic.Items.Add(filename);
-                    }
-                    else
-                    {
-                    }
+                    cmbGraphic.Items.AddRange(sortedTextures);
+                }
+                else
+                {
+                    cmbGraphic.Items.Add(Strings.General.None);
                 }
 
-                if (cmbGraphic.Items.Count > 0)
-                {
-                    cmbGraphic.SelectedIndex = 0;
-                }
+                cmbGraphic.SelectedIndex = 0;
             }
         }
 
@@ -178,13 +187,21 @@ namespace Intersect.Editor.Forms.Editors.Events.Event_Commands
             Bitmap destBitmap = null;
             if (cmbGraphicType.SelectedIndex == 1) //Sprite
             {
-                sourceBitmap = new Bitmap("resources/entities/" + cmbGraphic.Text);
-                mSpriteWidth = sourceBitmap.Width / Options.Instance.Sprites.NormalFrames;
-                mSpriteHeight = sourceBitmap.Height / Options.Instance.Sprites.Directions;
+                var spriteFile = "resources/entities/" + cmbGraphic.Text;
+                if (File.Exists(spriteFile))
+                {
+                    sourceBitmap = new Bitmap(spriteFile);
+                    mSpriteWidth = sourceBitmap.Width / Options.Instance.Sprites.NormalFrames;
+                    mSpriteHeight = sourceBitmap.Height / Options.Instance.Sprites.Directions;
+                }
             }
             else if (cmbGraphicType.SelectedIndex == 2) //Tileset
             {
-                sourceBitmap = new Bitmap("resources/tilesets/" + cmbGraphic.Text);
+                var tileSetFile = "resources/tilesets/" + cmbGraphic.Text;
+                if (File.Exists(tileSetFile))
+                {
+                    sourceBitmap = new Bitmap(tileSetFile);
+                }
             }
 
             if (sourceBitmap != null)

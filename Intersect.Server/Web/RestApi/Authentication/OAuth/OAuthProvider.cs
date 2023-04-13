@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
 using Intersect.Server.Web.RestApi.Authentication.OAuth.Providers;
@@ -17,7 +17,7 @@ namespace Intersect.Server.Web.RestApi.Authentication.OAuth
 
     using RequestMap = Dictionary<(PathString, string, string), RequestMapFunc>;
 
-    internal class OAuthProvider : AuthenticationProvider
+    internal partial class OAuthProvider : AuthenticationProvider
     {
 
         public const string TokenEndpoint = "/api/oauth/token";
@@ -54,7 +54,7 @@ namespace Intersect.Server.Web.RestApi.Authentication.OAuth
                     TokenEndpointPath = new PathString(TokenEndpoint),
                     ApplicationCanDisplayErrors = true,
                     AllowInsecureHttp = true,
-                    AccessTokenExpireTimeSpan = TimeSpan.FromMinutes(Configuration.RefreshTokenLifetime),
+                    AccessTokenExpireTimeSpan = TimeSpan.FromMinutes(Configuration.AccessTokenLifetime),
                     Provider = OAuthAuthorizationServerProvider,
                     RefreshTokenProvider = RefreshTokenProvider
                 }

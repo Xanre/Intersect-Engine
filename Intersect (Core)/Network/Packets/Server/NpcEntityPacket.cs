@@ -1,9 +1,10 @@
-﻿using MessagePack;
+﻿using Intersect.Enums;
+using MessagePack;
 
 namespace Intersect.Network.Packets.Server
 {
     [MessagePackObject]
-    public class NpcEntityPacket : EntityPacket
+    public partial class NpcEntityPacket : EntityPacket
     {
         //Parameterless Constructor for MessagePack
         public NpcEntityPacket()
@@ -12,8 +13,7 @@ namespace Intersect.Network.Packets.Server
 
 
         [Key(24)]
-        public int Aggression { get; set; }
-
+        public NpcAggression Aggression { get; set; }
     }
 
 }

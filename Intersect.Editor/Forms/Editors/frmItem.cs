@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
@@ -32,24 +32,22 @@ namespace Intersect.Editor.Forms.Editors
 
         private List<string> mKnownCooldownGroups = new List<string>();
 
+        private bool EffectValueUpdating = false;
+
         public FrmItem()
         {
             ApplyHooks();
             InitializeComponent();
+            Icon = System.Drawing.Icon.ExtractAssociatedIcon(System.Reflection.Assembly.GetExecutingAssembly().Location);
 
             cmbEquipmentSlot.Items.Clear();
             cmbEquipmentSlot.Items.AddRange(Options.EquipmentSlots.ToArray());
             cmbToolType.Items.Clear();
-            cmbToolType.Items.Add(Strings.General.none);
+            cmbToolType.Items.Add(Strings.General.None);
             cmbToolType.Items.AddRange(Options.ToolTypes.ToArray());
-            cmbEquipmentBonus.Items.Clear();
-            for (var i = 0; i < Strings.ItemEditor.bonuseffects.Count; i++)
-            {
-                cmbEquipmentBonus.Items.Add(Strings.ItemEditor.bonuseffects[i]);
-            }
 
             cmbProjectile.Items.Clear();
-            cmbProjectile.Items.Add(Strings.General.none);
+            cmbProjectile.Items.Add(Strings.General.None);
             cmbProjectile.Items.AddRange(ProjectileBase.Names);
 
             lstGameObjects.Init(UpdateToolStripItems, AssignEditorItem, toolStripItemNew_Click, toolStripItemCopy_Click, toolStripItemUndo_Click, toolStripItemPaste_Click, toolStripItemDelete_Click);
@@ -110,36 +108,41 @@ namespace Intersect.Editor.Forms.Editors
         private void frmItem_Load(object sender, EventArgs e)
         {
             cmbPic.Items.Clear();
-            cmbPic.Items.Add(Strings.General.none);
+            cmbPic.Items.Add(Strings.General.None);
 
             var itemnames = GameContentManager.GetSmartSortedTextureNames(GameContentManager.TextureType.Item);
             cmbPic.Items.AddRange(itemnames);
 
+            cmbWeaponSprite.Items.Clear();
+            cmbWeaponSprite.Items.Add(Strings.General.None);
+            cmbWeaponSprite.Items.AddRange(
+                GameContentManager.GetOverridesFor(GameContentManager.TextureType.Entity, "weapon").ToArray()
+            );
             cmbAttackAnimation.Items.Clear();
-            cmbAttackAnimation.Items.Add(Strings.General.none);
+            cmbAttackAnimation.Items.Add(Strings.General.None);
             cmbAttackAnimation.Items.AddRange(AnimationBase.Names);
             cmbScalingStat.Items.Clear();
-            for (var x = 0; x < (int)Stats.StatCount; x++)
+            for (var x = 0; x < (int)Stat.StatCount; x++)
             {
                 cmbScalingStat.Items.Add(Globals.GetStatName(x));
             }
 
             cmbAnimation.Items.Clear();
-            cmbAnimation.Items.Add(Strings.General.none);
+            cmbAnimation.Items.Add(Strings.General.None);
             cmbAnimation.Items.AddRange(AnimationBase.Names);
             cmbEquipmentAnimation.Items.Clear();
-            cmbEquipmentAnimation.Items.Add(Strings.General.none);
+            cmbEquipmentAnimation.Items.Add(Strings.General.None);
             cmbEquipmentAnimation.Items.AddRange(AnimationBase.Names);
             cmbTeachSpell.Items.Clear();
-            cmbTeachSpell.Items.Add(Strings.General.none);
+            cmbTeachSpell.Items.Add(Strings.General.None);
             cmbTeachSpell.Items.AddRange(SpellBase.Names);
             cmbEvent.Items.Clear();
-            cmbEvent.Items.Add(Strings.General.none);
+            cmbEvent.Items.Add(Strings.General.None);
             cmbEvent.Items.AddRange(EventBase.Names);
             cmbMalePaperdoll.Items.Clear();
-            cmbMalePaperdoll.Items.Add(Strings.General.none);
+            cmbMalePaperdoll.Items.Add(Strings.General.None);
             cmbFemalePaperdoll.Items.Clear();
-            cmbFemalePaperdoll.Items.Add(Strings.General.none);
+            cmbFemalePaperdoll.Items.Add(Strings.General.None);
             var paperdollnames =
                 GameContentManager.GetSmartSortedTextureNames(GameContentManager.TextureType.Paperdoll);
 
@@ -194,6 +197,9 @@ namespace Intersect.Editor.Forms.Editors
             lblAnim.Text = Strings.ItemEditor.animation;
             chkCanDrop.Text = Strings.ItemEditor.CanDrop;
             lblDeathDropChance.Text = Strings.ItemEditor.DeathDropChance;
+            lblDespawnTime.Text = Strings.ItemEditor.DespawnTime;
+            tooltips.SetToolTip(lblDespawnTime, Strings.ItemEditor.DespawnTimeTooltip);
+            tooltips.SetToolTip(nudItemDespawnTime, Strings.ItemEditor.DespawnTimeTooltip);
             chkCanBank.Text = Strings.ItemEditor.CanBank;
             chkCanGuildBank.Text = Strings.ItemEditor.CanGuildBank;
             chkCanBag.Text = Strings.ItemEditor.CanBag;
@@ -204,9 +210,10 @@ namespace Intersect.Editor.Forms.Editors
             lblBankStackLimit.Text = Strings.ItemEditor.BankStackLimit;
 
             cmbRarity.Items.Clear();
-            for (var i = 0; i < Strings.ItemEditor.rarity.Count; i++)
+            for (var i = 0; i < Options.Instance.Items.RarityTiers.Count; i++)
             {
-                cmbRarity.Items.Add(Strings.ItemEditor.rarity[i]);
+                var rarityName = Options.Instance.Items.RarityTiers[i];
+                cmbRarity.Items.Add(Strings.ItemEditor.rarity[rarityName]);
             }
 
             grpEquipment.Text = Strings.ItemEditor.equipment;
@@ -218,14 +225,8 @@ namespace Intersect.Editor.Forms.Editors
             lblMag.Text = Strings.ItemEditor.abilitypowerbonus;
             lblMR.Text = Strings.ItemEditor.magicresistbonus;
             lblRange.Text = Strings.ItemEditor.bonusrange;
-            lblBonusEffect.Text = Strings.ItemEditor.bonuseffect;
             lblEffectPercent.Text = Strings.ItemEditor.bonusamount;
             lblEquipmentAnimation.Text = Strings.ItemEditor.equipmentanimation;
-            cmbEquipmentBonus.Items.Clear();
-            for (var i = 0; i < Strings.ItemEditor.bonuseffects.Count; i++)
-            {
-                cmbEquipmentBonus.Items.Add(Strings.ItemEditor.bonuseffects[i]);
-            }
 
             grpWeaponProperties.Text = Strings.ItemEditor.weaponproperties;
             chk2Hand.Text = Strings.ItemEditor.twohanded;
@@ -242,6 +243,7 @@ namespace Intersect.Editor.Forms.Editors
             lblScalingStat.Text = Strings.ItemEditor.scalingstat;
             lblScalingAmount.Text = Strings.ItemEditor.scalingamount;
             lblAttackAnimation.Text = Strings.ItemEditor.attackanimation;
+            lblSpriteAttack.Text = Strings.ItemEditor.AttackSpriteOverride;
             lblProjectile.Text = Strings.ItemEditor.projectile;
             lblToolType.Text = Strings.ItemEditor.tooltype;
 
@@ -268,6 +270,11 @@ namespace Intersect.Editor.Forms.Editors
                 cmbAttackSpeedModifier.Items.Add(val.ToString());
             }
 
+            grpShieldProperties.Text = Strings.ItemEditor.ShieldProperties;
+            lblBlockChance.Text = Strings.ItemEditor.BlockChance;
+            lblBlockAmount.Text = Strings.ItemEditor.BlockAmount;
+            lblBlockDmgAbs.Text = Strings.ItemEditor.BlockAbsorption;
+
             lblMalePaperdoll.Text = Strings.ItemEditor.malepaperdoll;
             lblFemalePaperdoll.Text = Strings.ItemEditor.femalepaperdoll;
 
@@ -286,7 +293,7 @@ namespace Intersect.Editor.Forms.Editors
             lblVital.Text = Strings.ItemEditor.vital;
             lblInterval.Text = Strings.ItemEditor.consumeamount;
             cmbConsume.Items.Clear();
-            for (var i = 0; i < (int) Vitals.VitalCount; i++)
+            for (var i = 0; i < (int) Vital.VitalCount; i++)
             {
                 cmbConsume.Items.Add(Strings.Combat.vitals[i]);
             }
@@ -304,6 +311,8 @@ namespace Intersect.Editor.Forms.Editors
 
             btnSave.Text = Strings.ItemEditor.save;
             btnCancel.Text = Strings.ItemEditor.cancel;
+
+            grpEffects.Text = Strings.ItemEditor.BonusEffectGroup;
         }
 
         private void UpdateEditor()
@@ -361,15 +370,17 @@ namespace Intersect.Editor.Forms.Editors
                 nudInvStackLimit.Value = mEditorItem.MaxInventoryStack;
                 nudBankStackLimit.Value = mEditorItem.MaxBankStack;
                 nudDeathDropChance.Value = mEditorItem.DropChanceOnDeath;
+                nudItemDespawnTime.Value = mEditorItem.DespawnTime;
                 cmbToolType.SelectedIndex = mEditorItem.Tool + 1;
                 cmbAttackAnimation.SelectedIndex = AnimationBase.ListIndex(mEditorItem.AttackAnimationId) + 1;
+                cmbWeaponSprite.SelectedIndex = cmbWeaponSprite.FindString(
+                        TextUtils.NullToNone(mEditorItem.WeaponSpriteOverride)
+                );
+                nudBlockChance.Value = mEditorItem.BlockChance;
+                nudBlockAmount.Value = mEditorItem.BlockAmount;
+                nudBlockDmgAbs.Value = mEditorItem.BlockAbsorption;
                 RefreshExtendedData();
-                if (mEditorItem.ItemType == ItemTypes.Equipment)
-                {
-                    cmbEquipmentBonus.SelectedIndex = (int) mEditorItem.Effect.Type;
-                }
 
-                nudEffectPercent.Value = mEditorItem.Effect.Percentage;
                 chk2Hand.Checked = mEditorItem.TwoHanded;
                 cmbMalePaperdoll.SelectedIndex =
                     cmbMalePaperdoll.FindString(TextUtils.NullToNone(mEditorItem.MalePaperdoll));
@@ -377,7 +388,7 @@ namespace Intersect.Editor.Forms.Editors
                 cmbFemalePaperdoll.SelectedIndex =
                     cmbFemalePaperdoll.FindString(TextUtils.NullToNone(mEditorItem.FemalePaperdoll));
 
-                if (mEditorItem.ItemType == ItemTypes.Consumable)
+                if (mEditorItem.ItemType == ItemType.Consumable)
                 {
                     cmbConsume.SelectedIndex = (int) mEditorItem.Consumable.Type;
                     nudInterval.Value = mEditorItem.Consumable.Value;
@@ -449,8 +460,6 @@ namespace Intersect.Editor.Forms.Editors
 
                 mEditorItem.TwoHanded = false;
                 mEditorItem.EquipmentSlot = 0;
-                mEditorItem.Effect.Type = EffectType.None;
-                mEditorItem.Effect.Percentage = 0;
 
                 mEditorItem.SlotCount = 0;
 
@@ -461,27 +470,27 @@ namespace Intersect.Editor.Forms.Editors
                 mEditorItem.Event = null;
             }
 
-            if (cmbType.SelectedIndex == (int) ItemTypes.Consumable)
+            if (cmbType.SelectedIndex == (int) ItemType.Consumable)
             {
                 cmbConsume.SelectedIndex = (int) mEditorItem.Consumable.Type;
                 nudInterval.Value = mEditorItem.Consumable.Value;
                 nudIntervalPercentage.Value = mEditorItem.Consumable.Percentage;
                 grpConsumable.Visible = true;
             }
-            else if (cmbType.SelectedIndex == (int) ItemTypes.Spell)
+            else if (cmbType.SelectedIndex == (int) ItemType.Spell)
             {
                 cmbTeachSpell.SelectedIndex = SpellBase.ListIndex(mEditorItem.SpellId) + 1;
                 chkQuickCast.Checked = mEditorItem.QuickCast;
                 chkSingleUseSpell.Checked = mEditorItem.SingleUse;
                 grpSpell.Visible = true;
             }
-            else if (cmbType.SelectedIndex == (int) ItemTypes.Event)
+            else if (cmbType.SelectedIndex == (int) ItemType.Event)
             {
                 cmbEvent.SelectedIndex = EventBase.ListIndex(mEditorItem.EventId) + 1;
                 chkSingleUseEvent.Checked = mEditorItem.SingleUse;
                 grpEvent.Visible = true;
             }
-            else if (cmbType.SelectedIndex == (int) ItemTypes.Equipment)
+            else if (cmbType.SelectedIndex == (int) ItemType.Equipment)
             {
                 grpEquipment.Visible = true;
                 if (mEditorItem.EquipmentSlot < -1 || mEditorItem.EquipmentSlot >= cmbEquipmentSlot.Items.Count)
@@ -490,13 +499,14 @@ namespace Intersect.Editor.Forms.Editors
                 }
 
                 cmbEquipmentSlot.SelectedIndex = mEditorItem.EquipmentSlot;
-                cmbEquipmentBonus.SelectedIndex = (int) mEditorItem.Effect.Type;
 
                 // Whether this item type is stackable is not up for debate.
                 chkStackable.Checked = false;
                 chkStackable.Enabled = false;
+
+                RefreshBonusList();
             }
-            else if (cmbType.SelectedIndex == (int) ItemTypes.Bag)
+            else if (cmbType.SelectedIndex == (int) ItemType.Bag)
             {
                 // Cant have no space or negative space.
                 mEditorItem.SlotCount = Math.Max(1, mEditorItem.SlotCount);
@@ -507,14 +517,14 @@ namespace Intersect.Editor.Forms.Editors
                 chkStackable.Checked = false;
                 chkStackable.Enabled = false;
             }
-            else if (cmbType.SelectedIndex == (int)ItemTypes.Currency)
+            else if (cmbType.SelectedIndex == (int)ItemType.Currency)
             {
                 // Whether this item type is stackable is not up for debate.
                 chkStackable.Checked = true;
                 chkStackable.Enabled = false;
             }
 
-            mEditorItem.ItemType = (ItemTypes) cmbType.SelectedIndex;
+            mEditorItem.ItemType = (ItemType) cmbType.SelectedIndex;
         }
 
         private void cmbType_SelectedIndexChanged(object sender, EventArgs e)
@@ -565,11 +575,18 @@ namespace Intersect.Editor.Forms.Editors
             mEditorItem.EquipmentSlot = cmbEquipmentSlot.SelectedIndex;
             if (cmbEquipmentSlot.SelectedIndex == Options.WeaponIndex)
             {
+                grpShieldProperties.Hide();
                 grpWeaponProperties.Show();
+            }
+            else if (cmbEquipmentSlot.SelectedIndex == Options.ShieldIndex)
+            {
+                grpWeaponProperties.Hide();
+                grpShieldProperties.Show();
             }
             else
             {
                 grpWeaponProperties.Hide();
+                grpShieldProperties.Hide();
 
                 mEditorItem.Projectile = null;
                 mEditorItem.Tool = -1;
@@ -585,7 +602,6 @@ namespace Intersect.Editor.Forms.Editors
 
         private void cmbEquipmentBonus_SelectedIndexChanged(object sender, EventArgs e)
         {
-            mEditorItem.Effect.Type = (EffectType) cmbEquipmentBonus.SelectedIndex;
         }
 
         private void chk2Hand_CheckedChanged(object sender, EventArgs e)
@@ -620,7 +636,7 @@ namespace Intersect.Editor.Forms.Editors
             {
                 if (DarkMessageBox.ShowWarning(
                         Strings.ItemEditor.deleteprompt, Strings.ItemEditor.deletetitle, DarkDialogButton.YesNo,
-                        Properties.Resources.Icon
+                        Icon
                     ) ==
                     DialogResult.Yes)
                 {
@@ -653,7 +669,7 @@ namespace Intersect.Editor.Forms.Editors
             {
                 if (DarkMessageBox.ShowWarning(
                         Strings.ItemEditor.undoprompt, Strings.ItemEditor.undotitle, DarkDialogButton.YesNo,
-                        Properties.Resources.Icon
+                        Icon
                     ) ==
                     DialogResult.Yes)
                 {
@@ -680,6 +696,11 @@ namespace Intersect.Editor.Forms.Editors
                     toolStripItemNew_Click(null, null);
                 }
             }
+        }
+
+        private void cmbWeaponSprite_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            mEditorItem.WeaponSpriteOverride = TextUtils.SanitizeNone(cmbWeaponSprite?.Text);
         }
 
         private void cmbAttackAnimation_SelectedIndexChanged(object sender, EventArgs e)
@@ -746,7 +767,13 @@ namespace Intersect.Editor.Forms.Editors
 
         private void nudEffectPercent_ValueChanged(object sender, EventArgs e)
         {
-            mEditorItem.Effect.Percentage = (int) nudEffectPercent.Value;
+            if (!IsValidBonusSelection || EffectValueUpdating)
+            {
+                return;
+            }
+
+            mEditorItem.SetEffectOfType(SelectedEffect, (int)nudEffectPercent.Value);
+            lstBonusEffects.Items[lstBonusEffects.SelectedIndex] = GetBonusEffectRow(SelectedEffect);
         }
 
         private void nudRange_ValueChanged(object sender, EventArgs e)
@@ -946,12 +973,12 @@ namespace Intersect.Editor.Forms.Editors
 
         private void chkSingleUse_CheckedChanged(object sender, EventArgs e)
         {
-            switch ((ItemTypes)cmbType.SelectedIndex)
+            switch ((ItemType)cmbType.SelectedIndex)
             {
-                case ItemTypes.Spell:
+                case ItemType.Spell:
                     mEditorItem.SingleUse = chkSingleUseSpell.Checked;
                     break;
-                case ItemTypes.Event:
+                case ItemType.Event:
                     mEditorItem.SingleUse = chkSingleUseEvent.Checked;
                     break;
             }
@@ -1027,6 +1054,26 @@ namespace Intersect.Editor.Forms.Editors
             DrawItemIcon();
             DrawItemPaperdoll(Gender.Male);
             DrawItemPaperdoll(Gender.Female);
+        }
+
+        private void nudBlockChance_ValueChanged(object sender, EventArgs e)
+        {
+            mEditorItem.BlockChance = (int)nudBlockChance.Value;
+        }
+
+        private void nudBlockAmount_ValueChanged(object sender, EventArgs e)
+        {
+            mEditorItem.BlockAmount = (int)nudBlockAmount.Value;
+        }
+
+        private void nudBlockDmgAbs_ValueChanged(object sender, EventArgs e)
+        {
+            mEditorItem.BlockAbsorption = (int)nudBlockDmgAbs.Value;
+        }
+
+        private void nudItemDespawnTime_ValueChanged(object sender, EventArgs e)
+        {
+            mEditorItem.DespawnTime = (long)nudItemDespawnTime.Value;
         }
 
         /// <summary>
@@ -1153,10 +1200,10 @@ namespace Intersect.Editor.Forms.Editors
                     }
                 }
 
-                if (!string.IsNullOrWhiteSpace(((ItemBase)itm.Value).CooldownGroup) && 
+                if (!string.IsNullOrWhiteSpace(((ItemBase)itm.Value).CooldownGroup) &&
                     !mKnownCooldownGroups.Contains(((ItemBase)itm.Value).CooldownGroup))
                 {
-                    mKnownCooldownGroups.Add(((ItemBase)itm.Value).CooldownGroup);    
+                    mKnownCooldownGroups.Add(((ItemBase)itm.Value).CooldownGroup);
                 }
             }
 
@@ -1260,6 +1307,53 @@ namespace Intersect.Editor.Forms.Editors
 
 
         #endregion
+
+        private void RefreshBonusList()
+        {
+            lstBonusEffects.Items.Clear();
+            // Skip the "none" value - we don't care about that anymore, that's legacy
+            var idx = 1;
+            foreach (var effectName in Strings.ItemEditor.bonuseffects.Skip(1))
+            {
+                lstBonusEffects.Items.Add(GetBonusEffectRow((ItemEffect)idx));
+                idx++;
+            }
+        }
+
+        private bool IsValidBonusSelection
+        {
+            get => lstBonusEffects.SelectedIndex > -1 && lstBonusEffects.SelectedIndex < lstBonusEffects.Items.Count;
+        }
+
+        private ItemEffect SelectedEffect
+        {
+            get => IsValidBonusSelection ? (ItemEffect)(lstBonusEffects.SelectedIndex + 1) : ItemEffect.None;
+        }
+
+        private string GetBonusEffectRow(ItemEffect itemEffect)
+        {
+            var effectName = Strings.ItemEditor.bonuseffects[(int)itemEffect];
+            var effectAmt = mEditorItem.GetEffectPercentage(itemEffect);
+            return Strings.ItemEditor.BonusEffectItem.ToString(effectName, effectAmt);
+        }
+
+        private void lstBonusEffects_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (!IsValidBonusSelection)
+            {
+                return;
+            }
+
+            var selected = SelectedEffect;
+            if (!mEditorItem.EffectsEnabled.Contains(selected))
+            {
+                mEditorItem.Effects.Add(new EffectData(selected, 0));
+            }
+
+            EffectValueUpdating = true;
+            nudEffectPercent.Value = mEditorItem.GetEffectPercentage(selected);
+            EffectValueUpdating = false;
+        }
     }
 
 }

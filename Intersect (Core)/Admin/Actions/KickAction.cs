@@ -4,7 +4,7 @@ using MessagePack;
 namespace Intersect.Admin.Actions
 {
     [MessagePackObject]
-    public class KickAction : AdminAction
+    public partial class KickAction : AdminAction
     {
         //Parameterless Constructor for MessagePack
         public KickAction()
@@ -18,7 +18,7 @@ namespace Intersect.Admin.Actions
         }
 
         [Key(1)]
-        public override AdminActions Action { get; } = AdminActions.Kick;
+        public override Enums.AdminAction Action { get; } = Enums.AdminAction.Kick;
 
         [Key(2)]
         public string Name { get; set; }

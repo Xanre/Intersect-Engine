@@ -4,7 +4,7 @@ using MessagePack;
 namespace Intersect.Admin.Actions
 {
     [MessagePackObject]
-    public class MuteAction : AdminAction
+    public partial class MuteAction : AdminAction
     {
         //Parameterless Constructor for MessagePack
         public MuteAction()
@@ -21,7 +21,7 @@ namespace Intersect.Admin.Actions
         }
 
         [Key(1)]
-        public override AdminActions Action { get; } = AdminActions.Mute;
+        public override Enums.AdminAction Action { get; } = Enums.AdminAction.Mute;
 
         [Key(2)]
         public string Name { get; set; }

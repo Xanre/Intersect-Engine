@@ -1,4 +1,4 @@
-﻿using DarkUI.Controls;
+using DarkUI.Controls;
 
 namespace Intersect.Editor.Forms.Editors
 {
@@ -33,6 +33,8 @@ namespace Intersect.Editor.Forms.Editors
             this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FrmSwitchVariable));
             this.grpTypes = new DarkUI.Controls.DarkGroupBox();
+            this.rdoUserVariables = new DarkUI.Controls.DarkRadioButton();
+            this.rdoGuildVariables = new DarkUI.Controls.DarkRadioButton();
             this.rdoGlobalVariables = new DarkUI.Controls.DarkRadioButton();
             this.rdoPlayerVariables = new DarkUI.Controls.DarkRadioButton();
             this.grpList = new DarkUI.Controls.DarkGroupBox();
@@ -78,6 +80,8 @@ namespace Intersect.Editor.Forms.Editors
             // 
             this.grpTypes.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(45)))), ((int)(((byte)(45)))), ((int)(((byte)(48)))));
             this.grpTypes.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(90)))), ((int)(((byte)(90)))), ((int)(((byte)(90)))));
+            this.grpTypes.Controls.Add(this.rdoUserVariables);
+            this.grpTypes.Controls.Add(this.rdoGuildVariables);
             this.grpTypes.Controls.Add(this.rdoGlobalVariables);
             this.grpTypes.Controls.Add(this.rdoPlayerVariables);
             this.grpTypes.ForeColor = System.Drawing.Color.Gainsboro;
@@ -87,6 +91,26 @@ namespace Intersect.Editor.Forms.Editors
             this.grpTypes.TabIndex = 0;
             this.grpTypes.TabStop = false;
             this.grpTypes.Text = "Variable Type";
+            // 
+            // rdoUserVariables
+            // 
+            this.rdoUserVariables.AutoSize = true;
+            this.rdoUserVariables.Location = new System.Drawing.Point(352, 20);
+            this.rdoUserVariables.Name = "rdoUserVariables";
+            this.rdoUserVariables.Size = new System.Drawing.Size(111, 17);
+            this.rdoUserVariables.TabIndex = 5;
+            this.rdoUserVariables.Text = "User Variables";
+            this.rdoUserVariables.CheckedChanged += new System.EventHandler(this.rdoUserVariables_CheckedChanged);
+            // 
+            // rdoGuildVariables
+            // 
+            this.rdoGuildVariables.AutoSize = true;
+            this.rdoGuildVariables.Location = new System.Drawing.Point(242, 20);
+            this.rdoGuildVariables.Name = "rdoGuildVariables";
+            this.rdoGuildVariables.Size = new System.Drawing.Size(95, 17);
+            this.rdoGuildVariables.TabIndex = 4;
+            this.rdoGuildVariables.Text = "Guild Variables";
+            this.rdoGuildVariables.CheckedChanged += new System.EventHandler(this.rdoGuildVariables_CheckedChanged);
             // 
             // rdoGlobalVariables
             // 
@@ -573,5 +597,7 @@ namespace Intersect.Editor.Forms.Editors
         private DarkComboBox cmbFolder;
         private DarkTextBox txtStringValue;
         private Controls.GameObjectList lstGameObjects;
+        private DarkRadioButton rdoGuildVariables;
+        private DarkRadioButton rdoUserVariables;
     }
 }

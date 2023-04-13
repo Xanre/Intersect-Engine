@@ -1,4 +1,5 @@
-﻿using System;
+using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 
@@ -15,7 +16,7 @@ using Newtonsoft.Json;
 namespace Intersect.GameObjects
 {
 
-    public class ItemBase : DatabaseObject<ItemBase>, IFolderable
+    public partial class ItemBase : DatabaseObject<ItemBase>, IFolderable
     {
 
         [NotMapped] public ConditionLists UsageRequirements = new ConditionLists();
@@ -132,13 +133,13 @@ namespace Intersect.GameObjects
 
         public int AttackSpeedValue { get; set; }
 
+        public string WeaponSpriteOverride { get; set; }
+
         public ConsumableData Consumable { get; set; }
 
         public int EquipmentSlot { get; set; }
 
         public bool TwoHanded { get; set; }
-
-        public EffectData Effect { get; set; }
 
         public int SlotCount { get; set; }
 
@@ -175,7 +176,7 @@ namespace Intersect.GameObjects
 
         public string FemalePaperdoll { get; set; } = "";
 
-        public ItemTypes ItemType { get; set; }
+        public ItemType ItemType { get; set; }
 
         public string MalePaperdoll { get; set; } = "";
 
@@ -236,12 +237,33 @@ namespace Intersect.GameObjects
 
         public int Tool { get; set; } = -1;
 
+        /// <summary>
+        /// Defines the player's chance of successfully defending a hit.
+        /// </summary>
+        public int BlockChance { get; set; }
+
+        /// <summary>
+        /// Sets the damage absorption percentage when successfully defending a hit.
+        /// </summary>
+        public int BlockAmount { get; set; }
+
+        /// <summary>
+        /// Sets the amount of damage absorption to increase the defender's health
+        /// </summary>
+        public int BlockAbsorption { get; set; }
+
+        /// <summary>
+        /// Time in which this item will remain on a map before despawning. Set to 0 to use server configured default value.
+        /// </summary>
+        public long DespawnTime { get; set; }
+
+
         [Column("VitalsGiven")]
         [JsonIgnore]
         public string VitalsJson
         {
-            get => DatabaseUtils.SaveIntArray(VitalsGiven, (int) Vitals.VitalCount);
-            set => VitalsGiven = DatabaseUtils.LoadIntArray(value, (int) Vitals.VitalCount);
+            get => DatabaseUtils.SaveIntArray(VitalsGiven, (int) Vital.VitalCount);
+            set => VitalsGiven = DatabaseUtils.LoadIntArray(value, (int) Vital.VitalCount);
         }
 
         [NotMapped]
@@ -251,8 +273,8 @@ namespace Intersect.GameObjects
         [JsonIgnore]
         public string VitalsRegenJson
         {
-            get => DatabaseUtils.SaveIntArray(VitalsRegen, (int) Vitals.VitalCount);
-            set => VitalsRegen = DatabaseUtils.LoadIntArray(value, (int) Vitals.VitalCount);
+            get => DatabaseUtils.SaveIntArray(VitalsRegen, (int) Vital.VitalCount);
+            set => VitalsRegen = DatabaseUtils.LoadIntArray(value, (int) Vital.VitalCount);
         }
 
         [NotMapped]
@@ -262,8 +284,8 @@ namespace Intersect.GameObjects
         [JsonIgnore]
         public string PercentageVitalsJson
         {
-            get => DatabaseUtils.SaveIntArray(PercentageVitalsGiven, (int) Vitals.VitalCount);
-            set => PercentageVitalsGiven = DatabaseUtils.LoadIntArray(value, (int) Vitals.VitalCount);
+            get => DatabaseUtils.SaveIntArray(PercentageVitalsGiven, (int) Vital.VitalCount);
+            set => PercentageVitalsGiven = DatabaseUtils.LoadIntArray(value, (int) Vital.VitalCount);
         }
 
         [NotMapped]
@@ -273,8 +295,8 @@ namespace Intersect.GameObjects
         [JsonIgnore]
         public string StatsJson
         {
-            get => DatabaseUtils.SaveIntArray(StatsGiven, (int) Stats.StatCount);
-            set => StatsGiven = DatabaseUtils.LoadIntArray(value, (int) Stats.StatCount);
+            get => DatabaseUtils.SaveIntArray(StatsGiven, (int) Stat.StatCount);
+            set => StatsGiven = DatabaseUtils.LoadIntArray(value, (int) Stat.StatCount);
         }
 
         [NotMapped]
@@ -284,8 +306,8 @@ namespace Intersect.GameObjects
         [JsonIgnore]
         public string PercentageStatsJson
         {
-            get => DatabaseUtils.SaveIntArray(PercentageStatsGiven, (int) Stats.StatCount);
-            set => PercentageStatsGiven = DatabaseUtils.LoadIntArray(value, (int) Stats.StatCount);
+            get => DatabaseUtils.SaveIntArray(PercentageStatsGiven, (int) Stat.StatCount);
+            set => PercentageStatsGiven = DatabaseUtils.LoadIntArray(value, (int) Stat.StatCount);
         }
 
         [NotMapped]
@@ -300,9 +322,41 @@ namespace Intersect.GameObjects
         }
 
         [JsonIgnore, NotMapped]
-        public bool IsStackable => (ItemType == ItemTypes.Currency || Stackable) &&
-                                   ItemType != ItemTypes.Equipment &&
-                                   ItemType != ItemTypes.Bag;
+        public bool IsStackable => (ItemType == ItemType.Currency || Stackable) &&
+                                   ItemType != ItemType.Equipment &&
+                                   ItemType != ItemType.Bag;
+
+        [NotMapped]
+        public List<EffectData> Effects { get; set; }
+
+        [Column("Effects")]
+        [JsonIgnore]
+        public string EffectsJson
+        {
+            get => JsonConvert.SerializeObject(Effects);
+            set => Effects = JsonConvert.DeserializeObject<List<EffectData>>(value ?? "") ?? new List<EffectData>();
+        }
+
+        public int GetEffectPercentage(ItemEffect type)
+        {
+            return Effects.Find(effect => effect.Type == type)?.Percentage ?? 0;
+        }
+
+        [NotMapped, JsonIgnore]
+        public ItemEffect[] EffectsEnabled
+        {
+            get => Effects.Select(effect => effect.Type).ToArray();
+        }
+
+        public void SetEffectOfType(ItemEffect type, int value)
+        {
+            var effectToEdit = Effects.Find(effect => effect.Type == type);
+            if (effectToEdit == default)
+            {
+                return;
+            }
+            effectToEdit.Percentage = value;
+        }
 
         /// <inheritdoc />
         public string Folder { get; set; } = "";
@@ -329,20 +383,20 @@ namespace Intersect.GameObjects
         {
             Name = "New Item";
             Speed = 10; // Set to 10 by default.
-            StatsGiven = new int[(int) Stats.StatCount];
-            PercentageStatsGiven = new int[(int) Stats.StatCount];
-            VitalsGiven = new int[(int) Vitals.VitalCount];
-            VitalsRegen = new int[(int) Vitals.VitalCount];
-            PercentageVitalsGiven = new int[(int) Vitals.VitalCount];
+            StatsGiven = new int[(int) Stat.StatCount];
+            PercentageStatsGiven = new int[(int) Stat.StatCount];
+            VitalsGiven = new int[(int) Vital.VitalCount];
+            VitalsRegen = new int[(int) Vital.VitalCount];
+            PercentageVitalsGiven = new int[(int) Vital.VitalCount];
             Consumable = new ConsumableData();
-            Effect = new EffectData();
+            Effects = new List<EffectData>();
             Color = new Color(255, 255, 255, 255);
         }
 
     }
 
     [Owned]
-    public class ConsumableData
+    public partial class ConsumableData
     {
 
         public ConsumableType Type { get; set; }
@@ -354,10 +408,22 @@ namespace Intersect.GameObjects
     }
 
     [Owned]
-    public class EffectData
+    public partial class EffectData
     {
 
-        public EffectType Type { get; set; }
+        public EffectData()
+        {
+            Type = default;
+            Percentage = default;
+        }
+
+        public EffectData(ItemEffect type, int percentage)
+        {
+            Type = type;
+            Percentage = percentage;
+        }
+
+        public ItemEffect Type { get; set; }
 
         public int Percentage { get; set; }
 

@@ -8,7 +8,7 @@ using Intersect.Enums;
 namespace Intersect.Server.Web.RestApi.Constraints
 {
 
-    internal sealed class AdminActionsConstraint : IHttpRouteConstraint
+    internal sealed partial class AdminActionsConstraint : IHttpRouteConstraint
     {
 
         /// <inheritdoc />
@@ -27,7 +27,7 @@ namespace Intersect.Server.Web.RestApi.Constraints
 
             var stringValue = value as string ?? Convert.ToString(value);
 
-            return Enum.TryParse<AdminActions>(stringValue, out _);
+            return Enum.TryParse<AdminAction>(stringValue, out _);
         }
 
     }

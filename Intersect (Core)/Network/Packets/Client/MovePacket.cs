@@ -1,17 +1,18 @@
 ﻿using MessagePack;
 using System;
+using Intersect.Enums;
 
 namespace Intersect.Network.Packets.Client
 {
     [MessagePackObject]
-    public class MovePacket : AbstractTimedPacket
+    public partial class MovePacket : AbstractTimedPacket
     {
         //Parameterless Constructor for MessagePack
         public MovePacket()
         {
         }
 
-        public MovePacket(Guid mapId, byte x, byte y, byte dir)
+        public MovePacket(Guid mapId, byte x, byte y, Direction dir)
         {
             MapId = mapId;
             X = x;
@@ -29,7 +30,7 @@ namespace Intersect.Network.Packets.Client
         public byte Y { get; set; }
 
         [Key(6)]
-        public byte Dir { get; set; }
+        public Direction Dir { get; set; }
 
     }
 

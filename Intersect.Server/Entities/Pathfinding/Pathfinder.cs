@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
 using Intersect.Enums;
@@ -25,7 +25,7 @@ namespace Intersect.Server.Entities.Pathfinding
 
     }
 
-    class Pathfinder
+    partial class Pathfinder
     {
 
         private int mConsecutiveFails;
@@ -71,7 +71,7 @@ namespace Intersect.Server.Entities.Pathfinding
                 var path = mPath;
                 if (mWaitTime < timeMs)
                 {
-                    var currentMap = MapInstance.Get(mEntity.MapId);
+                    var currentMap = MapController.Get(mEntity.MapId);
                     if (currentMap != null && mTarget != null)
                     {
                         var grid = DbInterface.GetGrid(currentMap.MapGrid);
@@ -179,118 +179,110 @@ namespace Intersect.Server.Entities.Pathfinding
                                                 continue;
                                             }
 
-                                            if (grid.MyGrid[x, y] != Guid.Empty)
+                                            if (MapController.TryGetInstanceFromMap(grid.MyGrid[x, y], mEntity.MapInstanceId, out var instance))
                                             {
-                                                var tmpMap = MapInstance.Get(grid.MyGrid[x, y]);
-                                                if (tmpMap != null)
-                                                {
-                                                    //Copy the cached array of tile blocks
-                                                    var blocks = tmpMap.GetCachedBlocks(
-                                                        mEntity.GetType() == typeof(Player)
-                                                    );
+                                                //Copy the cached array of tile blocks
 
-                                                    foreach (var block in blocks)
+                                                var blocks = instance.GetCachedBlocks(mEntity is Player);
+
+                                                foreach (var block in blocks)
+                                                {
+                                                    mapGrid[(x + 1 - gridX) * Options.MapWidth + block.X,
+                                                            (y + 1 - gridY) * Options.MapHeight + block.Y]
+                                                        .IsWall = true;
+                                                }
+
+                                                //Block of Players, Npcs, and Resources
+                                                foreach (var en in instance.GetEntities())
+                                                {
+                                                    if (!en.IsPassable() && en.X > -1 && en.X < Options.MapWidth && en.Y > -1 && en.Y < Options.MapHeight)
                                                     {
-                                                        mapGrid[(x + 1 - gridX) * Options.MapWidth + block.X,
-                                                                (y + 1 - gridY) * Options.MapHeight + block.Y]
+                                                        mapGrid[(x + 1 - gridX) * Options.MapWidth + en.X,
+                                                                (y + 1 - gridY) * Options.MapHeight + en.Y]
                                                             .IsWall = true;
                                                     }
+                                                }
 
-                                                    //Block of Players, Npcs, and Resources
-                                                    foreach (var en in tmpMap.GetEntities())
+                                                foreach (var en in instance.GlobalEventInstances)
+                                                {
+                                                    if (en.Value != null && en.Value.X > -1 && en.Value.X < Options.MapWidth && en.Value.Y > -1 && en.Value.Y < Options.MapHeight)
                                                     {
-                                                        if (!en.IsPassable() && en.X > -1 && en.X < Options.MapWidth && en.Y > -1 && en.Y < Options.MapHeight)
+                                                        foreach (var page in en.Value.GlobalPageInstance)
                                                         {
-                                                            mapGrid[(x + 1 - gridX) * Options.MapWidth + en.X,
-                                                                    (y + 1 - gridY) * Options.MapHeight + en.Y]
-                                                                .IsWall = true;
-                                                        }
-                                                    }
-
-                                                    //Block Global Events if they are not passable.
-                                                    foreach (var en in tmpMap.GlobalEventInstances)
-                                                    {
-                                                        if (en.Value != null && en.Value.X > -1 && en.Value.X < Options.MapWidth && en.Value.Y > -1 && en.Value.Y < Options.MapHeight)
-                                                        {
-                                                            foreach (var page in en.Value.GlobalPageInstance)
+                                                            if (!page.Passable)
                                                             {
-                                                                if (!page.Passable)
-                                                                {
-                                                                    mapGrid[
-                                                                            (x + 1 - gridX) * Options.MapWidth +
-                                                                            en.Value.X,
-                                                                            (y + 1 - gridY) * Options.MapHeight +
-                                                                            en.Value.Y]
-                                                                        .IsWall = true;
-                                                                }
+                                                                mapGrid[
+                                                                        (x + 1 - gridX) * Options.MapWidth +
+                                                                        en.Value.X,
+                                                                        (y + 1 - gridY) * Options.MapHeight +
+                                                                        en.Value.Y]
+                                                                    .IsWall = true;
                                                             }
                                                         }
                                                     }
+                                                }
 
-                                                    //If this is a local event then we gotta loop through all other local events for the player
-                                                    if (mEntity.GetType() == typeof(EventPageInstance))
+                                                //If this is a local event then we gotta loop through all other local events for the player
+                                                if (mEntity is EventPageInstance eventPage)
+                                                {
+                                                    //Make sure this is a local event
+                                                    if (!eventPage.Passable && eventPage.Player != null)
                                                     {
-                                                        var ev = (EventPageInstance)mEntity;
-                                                        if (!ev.Passable && ev.Player != null)
-
-                                                        //Make sure this is a local event
+                                                        var player = eventPage.Player;
+                                                        if (player != null)
                                                         {
-                                                            var player = ev.Player;
-                                                            if (player != null)
+                                                            if (player.EventLookup.Values.Count >
+                                                                Options.MapWidth * Options.MapHeight)
                                                             {
-                                                                if (player.EventLookup.Values.Count >
-                                                                    Options.MapWidth * Options.MapHeight)
+                                                                //Find all events on this map (since events can't switch maps)
+                                                                for (var mapX = 0; mapX < Options.MapWidth; mapX++)
                                                                 {
-                                                                    //Find all events on this map (since events can't switch maps)
-                                                                    for (var mapX = 0; mapX < Options.MapWidth; mapX++)
+                                                                    for (var mapY = 0;
+                                                                        mapY < Options.MapHeight;
+                                                                        mapY++)
                                                                     {
-                                                                        for (var mapY = 0;
-                                                                            mapY < Options.MapHeight;
-                                                                            mapY++)
-                                                                        {
-                                                                            var evt = player.EventExists(new MapTileLoc(
-                                                                                ev.MapId, mapX, mapY
-                                                                            ));
+                                                                        var evt = player.EventExists(new MapTileLoc(
+                                                                            eventPage.MapId, mapX, mapY
+                                                                        ));
 
-                                                                            if (evt != null)
+                                                                        if (evt != null)
+                                                                        {
+                                                                            if (evt.PageInstance != null &&
+                                                                                !evt.PageInstance.Passable &&
+                                                                                evt.PageInstance.X > -1 &&
+                                                                                evt.PageInstance.Y > -1)
                                                                             {
-                                                                                if (evt.PageInstance != null &&
-                                                                                    !evt.PageInstance.Passable &&
-                                                                                    evt.PageInstance.X > -1 &&
-                                                                                    evt.PageInstance.Y > -1)
-                                                                                {
-                                                                                    mapGrid[
-                                                                                            (x + 1 - gridX) *
-                                                                                            Options.MapWidth +
-                                                                                            evt.X,
-                                                                                            (y + 1 - gridY) *
-                                                                                            Options.MapHeight +
-                                                                                            evt.Y]
-                                                                                        .IsWall = true;
-                                                                                }
+                                                                                mapGrid[
+                                                                                        (x + 1 - gridX) *
+                                                                                        Options.MapWidth +
+                                                                                        evt.X,
+                                                                                        (y + 1 - gridY) *
+                                                                                        Options.MapHeight +
+                                                                                        evt.Y]
+                                                                                    .IsWall = true;
                                                                             }
                                                                         }
                                                                     }
                                                                 }
-                                                                else
+                                                            }
+                                                            else
+                                                            {
+                                                                var playerEvents = player.EventLookup.Values;
+                                                                foreach (var evt in playerEvents)
                                                                 {
-                                                                    var playerEvents = player.EventLookup.Values;
-                                                                    foreach (var evt in playerEvents)
+                                                                    if (evt != null &&
+                                                                        evt.PageInstance != null &&
+                                                                        !evt.PageInstance.Passable &&
+                                                                        evt.PageInstance.X > -1 &&
+                                                                        evt.PageInstance.Y > -1)
                                                                     {
-                                                                        if (evt != null &&
-                                                                            evt.PageInstance != null &&
-                                                                            !evt.PageInstance.Passable &&
-                                                                            evt.PageInstance.X > -1 &&
-                                                                            evt.PageInstance.Y > -1)
-                                                                        {
-                                                                            mapGrid[
-                                                                                    (x + 1 - gridX) * Options.MapWidth +
-                                                                                    evt.PageInstance.X,
-                                                                                    (y + 1 - gridY) *
-                                                                                    Options.MapHeight +
-                                                                                    evt.PageInstance.Y]
-                                                                                .IsWall = true;
-                                                                        }
+                                                                        mapGrid[
+                                                                                (x + 1 - gridX) * Options.MapWidth +
+                                                                                evt.PageInstance.X,
+                                                                                (y + 1 - gridY) *
+                                                                                Options.MapHeight +
+                                                                                evt.PageInstance.Y]
+                                                                            .IsWall = true;
                                                                     }
                                                                 }
                                                             }
@@ -442,58 +434,80 @@ namespace Intersect.Server.Entities.Pathfinding
             mWaitTime = timeMs + 1000;
         }
 
-        public sbyte GetMove()
+        public Direction GetMove()
         {
             if (mPath == null)
             {
-                return -1;
+                return Direction.None;
             }
 
-            var enm = mPath.GetEnumerator();
-            while (enm.MoveNext())
+            using (var enm = mPath.GetEnumerator())
             {
-                if (enm.Current.X - Options.MapWidth == mEntity.X && enm.Current.Y - Options.MapHeight == mEntity.Y)
+                while (enm.MoveNext())
                 {
-                    if (enm.MoveNext())
+                    if (enm.Current.X - Options.MapWidth != mEntity.X || enm.Current.Y - Options.MapHeight != mEntity.Y)
                     {
-                        var newX = enm.Current.X - Options.MapWidth;
-                        var newY = enm.Current.Y - Options.MapHeight;
-                        if (mEntity.X < newX)
-                        {
-                            enm.Dispose();
+                        continue;
+                    }
 
-                            return (int) Directions.Right;
+                    if (!enm.MoveNext())
+                    {
+                        continue;
+                    }
+
+                    var newX = enm.Current.X - Options.MapWidth;
+                    var newY = enm.Current.Y - Options.MapHeight;
+
+                    if (mEntity.Y > newY && mEntity.X == newX)
+                    {
+                        return Direction.Up;
+                    }
+
+                    if (mEntity.Y < newY && mEntity.X == newX)
+                    {
+                        return Direction.Down;
+                    }
+
+                    if (mEntity.X > newX && mEntity.Y == newY)
+                    {
+                        return Direction.Left;
+                    }
+
+                    if (mEntity.X < newX && mEntity.Y == newY)
+                    {
+                        return Direction.Right;
+                    }
+
+                    if (Options.Instance.MapOpts.EnableDiagonalMovement)
+                    {
+                        if (mEntity.Y > newY && mEntity.X > newX)
+                        {
+                            return Direction.UpLeft;
                         }
-                        else if (mEntity.X > newX)
-                        {
-                            enm.Dispose();
 
-                            return (int) Directions.Left;
+                        if (mEntity.Y > newY && mEntity.X < newX)
+                        {
+                            return Direction.UpRight;
                         }
-                        else if (mEntity.Y < newY)
-                        {
-                            enm.Dispose();
 
-                            return (int) Directions.Down;
+                        if (mEntity.Y < newY && mEntity.X < newX)
+                        {
+                            return Direction.DownRight;
                         }
-                        else if (mEntity.Y > newY)
-                        {
-                            enm.Dispose();
 
-                            return (int) Directions.Up;
+                        if (mEntity.Y < newY && mEntity.X > newX)
+                        {
+                            return Direction.DownLeft;
                         }
                     }
                 }
             }
 
-            enm.Dispose();
-
-            return -1;
+            return Direction.None;
         }
-
     }
 
-    public class AStarSolver : SpatialAStar
+    public partial class AStarSolver : SpatialAStar
     {
 
         public AStarSolver(PathNode[,] inGrid) : base(inGrid)

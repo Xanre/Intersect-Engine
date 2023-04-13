@@ -1,23 +1,23 @@
-﻿using MessagePack;
+using MessagePack;
 using System;
 
 namespace Intersect.Network.Packets.Server
 {
     [MessagePackObject]
-    public class InventoryUpdatePacket : IntersectPacket
+    public partial class InventoryUpdatePacket : IntersectPacket
     {
         //Parameterless Constructor for MessagePack
         public InventoryUpdatePacket()
         {
         }
 
-        public InventoryUpdatePacket(int slot, Guid id, int quantity, Guid? bagId, int[] statBuffs)
+        public InventoryUpdatePacket(int slot, Guid id, int quantity, Guid? bagId, ItemProperties properties)
         {
             Slot = slot;
             ItemId = id;
             BagId = bagId;
             Quantity = quantity;
-            StatBuffs = statBuffs;
+            Properties = properties;
         }
 
         [Key(1)]
@@ -33,7 +33,7 @@ namespace Intersect.Network.Packets.Server
         public int Quantity { get; set; }
 
         [Key(5)]
-        public int[] StatBuffs { get; set; }
+        public ItemProperties Properties { get; set; }
 
     }
 

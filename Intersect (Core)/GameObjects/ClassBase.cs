@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -13,16 +13,16 @@ using Newtonsoft.Json;
 namespace Intersect.GameObjects
 {
 
-    public class ClassBase : DatabaseObject<ClassBase>, IFolderable
+    public partial class ClassBase : DatabaseObject<ClassBase>, IFolderable
     {
 
         public const long DEFAULT_BASE_EXPERIENCE = 100;
 
         public const long DEFAULT_EXPERIENCE_INCREASE = 50;
 
-        [NotMapped] public int[] BaseStat = new int[(int) Stats.StatCount];
+        [NotMapped] public int[] BaseStat = new int[(int) Stat.StatCount];
 
-        [NotMapped] public int[] BaseVital = new int[(int) Vitals.VitalCount];
+        [NotMapped] public int[] BaseVital = new int[(int) Vital.VitalCount];
 
         [NotMapped] public Dictionary<int, long> ExperienceOverrides = new Dictionary<int, long>();
 
@@ -36,11 +36,11 @@ namespace Intersect.GameObjects
 
         [NotMapped] public List<ClassSprite> Sprites = new List<ClassSprite>();
 
-        [NotMapped] public int[] StatIncrease = new int[(int) Stats.StatCount];
+        [NotMapped] public int[] StatIncrease = new int[(int) Stat.StatCount];
 
-        [NotMapped] public int[] VitalIncrease = new int[(int) Vitals.VitalCount];
+        [NotMapped] public int[] VitalIncrease = new int[(int) Vital.VitalCount];
 
-        [NotMapped] public int[] VitalRegen = new int[(int) Vitals.VitalCount];
+        [NotMapped] public int[] VitalRegen = new int[(int) Vital.VitalCount];
 
         [JsonConstructor]
         public ClassBase(Guid id) : base(id)
@@ -91,6 +91,8 @@ namespace Intersect.GameObjects
 
         public int AttackSpeedValue { get; set; }
 
+        public string AttackSpriteOverride { get; set; }
+
         public long BaseExp
         {
             get => mBaseExp;
@@ -118,7 +120,7 @@ namespace Intersect.GameObjects
         [NotMapped]
         public ExperienceCurve ExperienceCurve { get; }
 
-        //Locked - Can the class be chosen from character select?
+        //Locked - Can the partial class be chosen from character select?
         public bool Locked { get; set; }
 
         public int PointIncrease { get; set; }
@@ -151,8 +153,8 @@ namespace Intersect.GameObjects
         [JsonIgnore]
         public string JsonBaseStats
         {
-            get => DatabaseUtils.SaveIntArray(BaseStat, (int) Stats.StatCount);
-            set => BaseStat = DatabaseUtils.LoadIntArray(value, (int) Stats.StatCount);
+            get => DatabaseUtils.SaveIntArray(BaseStat, (int) Stat.StatCount);
+            set => BaseStat = DatabaseUtils.LoadIntArray(value, (int) Stat.StatCount);
         }
 
         //Base Vitals
@@ -160,8 +162,8 @@ namespace Intersect.GameObjects
         [JsonIgnore]
         public string JsonBaseVitals
         {
-            get => DatabaseUtils.SaveIntArray(BaseVital, (int) Vitals.VitalCount);
-            set => BaseVital = DatabaseUtils.LoadIntArray(value, (int) Vitals.VitalCount);
+            get => DatabaseUtils.SaveIntArray(BaseVital, (int) Vital.VitalCount);
+            set => BaseVital = DatabaseUtils.LoadIntArray(value, (int) Vital.VitalCount);
         }
 
         //Starting Items
@@ -196,8 +198,8 @@ namespace Intersect.GameObjects
         [Column("StatIncreases")]
         public string StatIncreaseJson
         {
-            get => DatabaseUtils.SaveIntArray(StatIncrease, (int) Stats.StatCount);
-            set => StatIncrease = DatabaseUtils.LoadIntArray(value, (int) Stats.StatCount);
+            get => DatabaseUtils.SaveIntArray(StatIncrease, (int) Stat.StatCount);
+            set => StatIncrease = DatabaseUtils.LoadIntArray(value, (int) Stat.StatCount);
         }
 
         //Vital Increases (per level0
@@ -205,8 +207,8 @@ namespace Intersect.GameObjects
         [Column("VitalIncreases")]
         public string VitalIncreaseJson
         {
-            get => DatabaseUtils.SaveIntArray(VitalIncrease, (int) Vitals.VitalCount);
-            set => VitalIncrease = DatabaseUtils.LoadIntArray(value, (int) Vitals.VitalCount);
+            get => DatabaseUtils.SaveIntArray(VitalIncrease, (int) Vital.VitalCount);
+            set => VitalIncrease = DatabaseUtils.LoadIntArray(value, (int) Vital.VitalCount);
         }
 
         //Vital Regen %
@@ -214,8 +216,8 @@ namespace Intersect.GameObjects
         [Column("VitalRegen")]
         public string RegenJson
         {
-            get => DatabaseUtils.SaveIntArray(VitalRegen, (int) Vitals.VitalCount);
-            set => VitalRegen = DatabaseUtils.LoadIntArray(value, (int) Vitals.VitalCount);
+            get => DatabaseUtils.SaveIntArray(VitalRegen, (int) Vital.VitalCount);
+            set => VitalRegen = DatabaseUtils.LoadIntArray(value, (int) Vital.VitalCount);
         }
 
         [JsonIgnore]
@@ -248,7 +250,7 @@ namespace Intersect.GameObjects
 
     }
 
-    public class ClassItem
+    public partial class ClassItem
     {
 
         [JsonProperty]
@@ -263,7 +265,7 @@ namespace Intersect.GameObjects
 
     }
 
-    public class ClassSpell
+    public partial class ClassSpell
     {
 
         [JsonProperty]
@@ -278,7 +280,7 @@ namespace Intersect.GameObjects
 
     }
 
-    public class ClassSprite
+    public partial class ClassSprite
     {
 
         public string Face = "";

@@ -48,6 +48,8 @@ namespace Intersect.Server.Migrations.Game
 
                     b.Property<int>("AttackSpeedValue");
 
+                    b.Property<string>("AttackSpriteOverride");
+
                     b.Property<long>("BaseExp");
 
                     b.Property<int>("BasePoints");
@@ -127,12 +129,19 @@ namespace Intersect.Server.Migrations.Game
                     b.Property<Guid>("EventId")
                         .HasColumnName("Event");
 
+                    b.Property<int>("FailureChance");
+
                     b.Property<string>("Folder");
 
                     b.Property<string>("IngredientsJson")
                         .HasColumnName("Ingredients");
 
                     b.Property<Guid>("ItemId");
+
+                    b.Property<int>("ItemLossChance");
+
+                    b.Property<string>("JsonCraftingRequirements")
+                        .HasColumnName("CraftingRequirements");
 
                     b.Property<string>("Name");
 
@@ -195,6 +204,26 @@ namespace Intersect.Server.Migrations.Game
                     b.ToTable("Events");
                 });
 
+            modelBuilder.Entity("Intersect.GameObjects.GuildVariableBase", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd();
+
+                    b.Property<string>("Folder");
+
+                    b.Property<string>("Name");
+
+                    b.Property<string>("TextId");
+
+                    b.Property<long>("TimeCreated");
+
+                    b.Property<byte>("Type");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("GuildVariables");
+                });
+
             modelBuilder.Entity("Intersect.GameObjects.ItemBase", b =>
                 {
                     b.Property<Guid>("Id")
@@ -209,6 +238,12 @@ namespace Intersect.Server.Migrations.Game
                     b.Property<int>("AttackSpeedModifier");
 
                     b.Property<int>("AttackSpeedValue");
+
+                    b.Property<int>("BlockAbsorption");
+
+                    b.Property<int>("BlockAmount");
+
+                    b.Property<int>("BlockChance");
 
                     b.Property<bool>("CanBag");
 
@@ -239,7 +274,12 @@ namespace Intersect.Server.Migrations.Game
 
                     b.Property<string>("Description");
 
+                    b.Property<long>("DespawnTime");
+
                     b.Property<int>("DropChanceOnDeath");
+
+                    b.Property<string>("EffectsJson")
+                        .HasColumnName("Effects");
 
                     b.Property<Guid>("EquipmentAnimationId")
                         .HasColumnName("EquipmentAnimation");
@@ -323,6 +363,8 @@ namespace Intersect.Server.Migrations.Game
                     b.Property<string>("VitalsRegenJson")
                         .HasColumnName("VitalsRegen");
 
+                    b.Property<string>("WeaponSpriteOverride");
+
                     b.HasKey("Id");
 
                     b.ToTable("Items");
@@ -378,6 +420,9 @@ namespace Intersect.Server.Migrations.Game
                     b.Property<bool>("FocusHighestDamageDealer");
 
                     b.Property<string>("Folder");
+
+                    b.Property<string>("ImmunitiesJson")
+                        .HasColumnName("Immunities");
 
                     b.Property<bool>("IndividualizedLoot");
 
@@ -435,6 +480,8 @@ namespace Intersect.Server.Migrations.Game
 
                     b.Property<bool>("Swarm");
 
+                    b.Property<double>("Tenacity");
+
                     b.Property<long>("TimeCreated");
 
                     b.HasKey("Id");
@@ -480,6 +527,9 @@ namespace Intersect.Server.Migrations.Game
                     b.Property<string>("Folder");
 
                     b.Property<bool>("GrappleHook");
+
+                    b.Property<string>("GrappleHookOptionsJson")
+                        .HasColumnName("GrappleHookOptions");
 
                     b.Property<bool>("IgnoreActiveResources");
 
@@ -680,6 +730,8 @@ namespace Intersect.Server.Migrations.Game
 
                     b.Property<int>("CastDuration");
 
+                    b.Property<string>("CastSpriteOverride");
+
                     b.Property<int>("CooldownDuration");
 
                     b.Property<string>("CooldownGroup");
@@ -706,6 +758,9 @@ namespace Intersect.Server.Migrations.Game
                     b.Property<string>("Name");
 
                     b.Property<int>("SpellType");
+
+                    b.Property<Guid>("TickAnimationId")
+                        .HasColumnName("TickAnimation");
 
                     b.Property<long>("TimeCreated");
 
@@ -750,7 +805,27 @@ namespace Intersect.Server.Migrations.Game
                     b.ToTable("Time");
                 });
 
-            modelBuilder.Entity("Intersect.Server.Maps.MapInstance", b =>
+            modelBuilder.Entity("Intersect.GameObjects.UserVariableBase", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd();
+
+                    b.Property<byte>("DataType");
+
+                    b.Property<string>("Folder");
+
+                    b.Property<string>("Name");
+
+                    b.Property<string>("TextId");
+
+                    b.Property<long>("TimeCreated");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("UserVariables");
+                });
+
+            modelBuilder.Entity("Intersect.Server.Maps.MapController", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd();
@@ -778,6 +853,8 @@ namespace Intersect.Server.Migrations.Game
                     b.Property<int>("FogYSpeed");
 
                     b.Property<int>("GHue");
+
+                    b.Property<bool>("HideEquipment");
 
                     b.Property<bool>("IsIndoors");
 
@@ -916,22 +993,6 @@ namespace Intersect.Server.Migrations.Game
                             b1.HasOne("Intersect.GameObjects.ItemBase")
                                 .WithOne("Consumable")
                                 .HasForeignKey("Intersect.GameObjects.ConsumableData", "ItemBaseId")
-                                .OnDelete(DeleteBehavior.Cascade);
-                        });
-
-                    b.OwnsOne("Intersect.GameObjects.EffectData", "Effect", b1 =>
-                        {
-                            b1.Property<Guid>("ItemBaseId");
-
-                            b1.Property<int>("Percentage");
-
-                            b1.Property<byte>("Type");
-
-                            b1.ToTable("Items");
-
-                            b1.HasOne("Intersect.GameObjects.ItemBase")
-                                .WithOne("Effect")
-                                .HasForeignKey("Intersect.GameObjects.EffectData", "ItemBaseId")
                                 .OnDelete(DeleteBehavior.Cascade);
                         });
                 });

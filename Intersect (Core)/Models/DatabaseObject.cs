@@ -11,7 +11,7 @@ using Newtonsoft.Json;
 namespace Intersect.Models
 {
 
-    public abstract class DatabaseObject<TObject> : IDatabaseObject where TObject : DatabaseObject<TObject>
+    public abstract partial class DatabaseObject<TObject> : IDatabaseObject where TObject : DatabaseObject<TObject>
     {
 
         public const string Deleted = "ERR_DELETED";
@@ -106,7 +106,7 @@ namespace Intersect.Models
 
         public static Guid IdFromList(int listIndex)
         {
-            if (listIndex < 0 || listIndex > Lookup.KeyList.Count)
+            if (listIndex < 0 || listIndex >= Lookup.KeyList.Count)
             {
                 return Guid.Empty;
             }
@@ -116,7 +116,7 @@ namespace Intersect.Models
 
         public static TObject FromList(int listIndex)
         {
-            if (listIndex < 0 || listIndex > Lookup.ValueList.Count)
+            if (listIndex < 0 || listIndex >= Lookup.ValueList.Count)
             {
                 return null;
             }
@@ -148,6 +148,12 @@ namespace Intersect.Models
         public static string[] GetNameList()
         {
             return Lookup.Select(pair => pair.Value?.Name ?? Deleted).ToArray();
+        }
+
+        public static bool TryGet(Guid id, out TObject databaseObject)
+        {
+            databaseObject = Get(id);
+            return databaseObject != default;
         }
 
     }

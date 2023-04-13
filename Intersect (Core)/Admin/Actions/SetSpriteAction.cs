@@ -4,7 +4,7 @@ using MessagePack;
 namespace Intersect.Admin.Actions
 {
     [MessagePackObject]
-    public class SetSpriteAction : AdminAction
+    public partial class SetSpriteAction : AdminAction
     {
         //Parameterless Constructor for MessagePack
         public SetSpriteAction()
@@ -19,7 +19,7 @@ namespace Intersect.Admin.Actions
         }
 
         [Key(1)]
-        public override AdminActions Action { get; } = AdminActions.SetSprite;
+        public override Enums.AdminAction Action { get; } = Enums.AdminAction.SetSprite;
 
         [Key(2)]
         public string Name { get; set; }

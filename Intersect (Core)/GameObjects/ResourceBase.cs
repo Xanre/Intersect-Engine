@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -14,7 +14,7 @@ namespace Intersect.GameObjects
 {
 
     [Owned]
-    public class ResourceState
+    public partial class ResourceState
     {
 
         public string Graphic { get; set; } = null;
@@ -33,10 +33,10 @@ namespace Intersect.GameObjects
 
     }
 
-    public class ResourceBase : DatabaseObject<ResourceBase>, IFolderable
+    public partial class ResourceBase : DatabaseObject<ResourceBase>, IFolderable
     {
 
-        [NotMapped] public List<ResourceDrop> Drops = new List<ResourceDrop>();
+        [NotMapped] public List<Drop> Drops = new List<Drop>();
 
         [NotMapped] public ConditionLists HarvestingRequirements = new ConditionLists();
 
@@ -80,7 +80,7 @@ namespace Intersect.GameObjects
         public string JsonDrops
         {
             get => JsonConvert.SerializeObject(Drops);
-            set => Drops = JsonConvert.DeserializeObject<List<ResourceDrop>>(value);
+            set => Drops = JsonConvert.DeserializeObject<List<Drop>>(value);
         }
 
         //Requirements
@@ -120,19 +120,6 @@ namespace Intersect.GameObjects
         public bool WalkableBefore { get; set; }
 
         /// <inheritdoc />
-        public string Folder { get; set; } = "";
-
-        public class ResourceDrop
-        {
-
-            public double Chance;
-
-            public Guid ItemId;
-
-            public int Quantity;
-
-        }
-
+        public string Folder { get; set; } = string.Empty;
     }
-
 }

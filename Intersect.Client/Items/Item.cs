@@ -1,47 +1,31 @@
-﻿using System;
-
+using System;
+using Intersect.Client.Framework.Items;
 using Intersect.Enums;
 using Intersect.GameObjects;
+using Intersect.Network.Packets.Server;
 
 namespace Intersect.Client.Items
 {
 
-    public class Item
+    public partial class Item : IItem
     {
 
-        public Guid? BagId;
+        public Guid? BagId { get; set; }
 
-        public Guid ItemId;
+        public Guid ItemId { get; set; }
 
-        public int Quantity;
+        public int Quantity { get; set; }
 
-        public int[] StatBuffs = new int[(int) Stats.StatCount];
+        public ItemProperties ItemProperties { get; set; } = null;
 
         public ItemBase Base => ItemBase.Get(ItemId);
 
-        public void Load(Guid id, int quantity, Guid? bagId, int[] statBuffs)
+        public void Load(Guid id, int quantity, Guid? bagId, ItemProperties itemProperties)
         {
             ItemId = id;
             Quantity = quantity;
             BagId = bagId;
-            StatBuffs = statBuffs;
-        }
-
-        public Item Clone()
-        {
-            var newItem = new Item()
-            {
-                ItemId = ItemId,
-                Quantity = Quantity,
-                BagId = BagId
-            };
-
-            for (var i = 0; i < (int) Stats.StatCount; i++)
-            {
-                newItem.StatBuffs[i] = StatBuffs[i];
-            }
-
-            return newItem;
+            ItemProperties = itemProperties;
         }
 
     }
